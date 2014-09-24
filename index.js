@@ -24,6 +24,8 @@ bot.addListener( "message#", function( from, to, text, message ){
 		bot.action( to, 'giggles' );
 	}else if ( text.substr( 0,1 ) === '!' ){
 		docs( to, text.slice( 1 ) );
+	}else if ( text.slice( -5 ) === ' over' ){
+		bot.say( to, "KSHHHK" );
 	}else if ( text.slice( -1 ) === '?' ){
 		bot.say( to, randomZoidism() );
 	}
