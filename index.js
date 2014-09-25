@@ -18,7 +18,7 @@ bot.addListener( "join", function( channel, who ){
 });
 
 bot.addListener( "message#", function( from, to, text, message ){
-	if ( text.substr( 0,8 ) === 'zoidbox:' ){
+	if ( text.substr( 0, 7 ) === 'zoidbox' ){
 		bot.say( to, 'occupy me, ' + from );
 	}else if ( text.substr( 0, 12 ) === 'box install ' ){
 		bot.action( to, 'giggles' );
@@ -55,6 +55,16 @@ function randomZoidism(){
 }
 
 function docs( chan, q ){
+	q = q.toLowerCase();
+
+	if (q === "cfclient"){
+		return bot.say( chan, '<cfclient></cfclient> → returns a pink slip, because if you use this shit you should be fired. ~ http://www.codecademy.com/en/tracks/javascript');
+	}
+
+	if (q === "cf_socialplugin"){
+		return bot.say( chan, "<cf_socialplugin .. /> → returns a bunch of outdated junk that would have been better as a community project dear god what have we done we should have just given them a package manager like they've been asking for for years ~ http://cfdocs.org/cf_socialplugin")
+	}
+
 	var base = 'https://raw.githubusercontent.com/foundeo/cfdocs/master/data/en/';
 	var full = base + q + '.json';
 
