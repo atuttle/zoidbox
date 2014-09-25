@@ -9,13 +9,14 @@ var request = require('request');
 
 var bot = new irc.Client( config.server, config.botName, { channels: config.channels } );
 
-bot.addListener( "join", function( channel, who ){
-	if ( who !== 'zoidbox' ){
-		bot.action( channel, 'cracks the cooler open and nods at ' + who );
-	}else{
-		// bot.action( channel, 'tips fedora' );
-	}
-});
+//man people got butthurt over this one!
+// bot.addListener( "join", function( channel, who ){
+// 	if ( who !== 'zoidbox' ){
+// 		bot.action( channel, 'cracks the cooler open and nods at ' + who );
+// 	}else{
+// 		// bot.action( channel, 'tips fedora' );
+// 	}
+// });
 
 bot.addListener( "message#", function( from, to, text, message ){
 	if ( text.substr( 0, 7 ) === 'zoidbox' ){
