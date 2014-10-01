@@ -61,7 +61,11 @@ function docs( chan, q ){
 		if (err !== null){
 			bot.say( chan, err );
 		}else{
-			var msg = result.syntax + ' → returns ' + result.returns + ' ~ http://cfdocs.org/' + q;
+			if (result.type === "tag"){
+				var msg = result.syntax + ' → ' + result.description + ' ~ http://cfdocs.org/' + q;
+			}else{
+				var msg = result.syntax + ' → returns ' + result.returns + ' ~ http://cfdocs.org/' + q;
+			}
 			bot.say( chan, msg );
 		}
 	});
