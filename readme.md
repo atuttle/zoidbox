@@ -4,6 +4,20 @@ An IRC bot that (attempts to) bring the knowledge and wit of @boyzoid to ##coldf
 
 Pull requests welcome!
 
+## Current Abilities
+
+    zoidbox: {anything}
+    → random zoidism
+
+    !functionOrTagName
+    → docs for requested function or tag from cfdocs.org
+
+    end your message with a space and the word over
+    → KSHHK
+
+    box install {anything}
+    → *giggles*
+
 ## License
 
 >The MIT License (MIT)
