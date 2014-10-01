@@ -62,7 +62,7 @@ function docs( chan, q ){
 			bot.say( chan, err );
 		}else{
 			if (result.type === "tag"){
-				var msg = result.syntax + ' → ' + result.description.replace(/\n/g, ' ') + ' ~ http://cfdocs.org/' + q;
+				var msg = result.syntax + ' → ' + result.description.replace(/\s+/g, ' ') + ' ~ http://cfdocs.org/' + q;
 			}else{
 				var msg = result.syntax + ' → returns ' + result.returns + ' ~ http://cfdocs.org/' + q;
 			}
