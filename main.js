@@ -64,7 +64,7 @@ function docs( chan, q ){
 			if (result.type === "tag"){
 				var msg = result.syntax + ' → ' + result.description.replace(/\s+/g, ' ') + ' ~ http://cfdocs.org/' + q;
 			}else{
-				var msg = result.syntax + ' → returns ' + result.returns + ' ~ http://cfdocs.org/' + q;
+				var msg = result.syntax + ' → returns ' + ( result.returns.length ? result.returns : ' nothing' ) + ' ~ http://cfdocs.org/' + q;
 			}
 			bot.say( chan, msg );
 		}
