@@ -1,3 +1,5 @@
+'use strict';
+
 var config = {
 	channels: [ '##coldfusion' ]
 	,server: 'irc.freenode.net'
@@ -5,20 +7,11 @@ var config = {
 };
 
 var irc = require( 'irc' );
-var request = require('request');
+var cfdocs = require( './cfdocs' );
 
 var bot = new irc.Client( config.server, config.botName, { channels: config.channels } );
 
-//man people got butthurt over this one!
-// bot.addListener( "join", function( channel, who ){
-// 	if ( who !== 'zoidbox' ){
-// 		bot.action( channel, 'cracks the cooler open and nods at ' + who );
-// 	}else{
-// 		// bot.action( channel, 'tips fedora' );
-// 	}
-// });
-
-bot.addListener( "message#", function( from, to, text, message ){
+bot.addListener( "message#", function( from, to, text /*, message*/ ){
 	if ( text.substr( 0, 7 ) === 'zoidbox' ){
 		bot.say( to, randomZoidism() );
 	}else if ( text.substr( 0, 12 ) === 'box install ' ){
@@ -61,19 +54,16 @@ function docs( chan, q ){
 	}
 
 	if (q === "cf_socialplugin"){
-		return bot.say( chan, "<cf_socialplugin .. /> → returns a bunch of outdated junk that would have been better as a community project dear god what have we done we should have just given them a package manager like they've been asking for for years ~ http://cfdocs.org/cf_socialplugin")
+		return bot.say( chan, "<cf_socialplugin .. /> → returns a bunch of outdated junk that would have been better as a community project dear god what have we done we should have just given them a package manager like they've been asking for for years ~ http://cfdocs.org/cf_socialplugin");
 	}
 
-	var base = 'https://raw.githubusercontent.com/foundeo/cfdocs/master/data/en/';
-	var full = base + q + '.json';
-
-	request(full, function (error, response, body) {
-		if ( !error && response.statusCode == 200 ) {
-			var r = JSON.parse(body);
-			var msg = r.syntax + ' → returns ' + r.returns + ' ~ http://cfdocs.org/' + q;
+	cfdocs( q, function(err, result){
+		if (err !== null){
+			bot.say( chan, err );
+		}else{
+			var msg = result.syntax + ' → returns ' + result.returns + ' ~ http://cfdocs.org/' + q;
 			bot.say( chan, msg );
-		}else if ( response.statusCode == 404 ){
-			bot.say( chan, "Unable to find docs for `" + q + "`");
 		}
 	});
+
 }
