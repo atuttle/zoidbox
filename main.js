@@ -6,8 +6,14 @@ var config = {
 	,botName: 'zoidbox'
 };
 
+var env = process.env.NODE_ENV || 'dev';
+if (env === 'dev'){
+	config.botName = 'zoidbox`dev';
+}
+
 var irc = require( 'irc' );
 var cfdocs = require( './cfdocs' );
+var isup = require('is-up');
 
 var bot = new irc.Client( config.server, config.botName, { channels: config.channels } );
 
@@ -16,10 +22,19 @@ bot.addListener( "message#", function( from, to, text /*, message*/ ){
 		bot.say( to, randomZoidism() );
 	}else if ( text.substr( 0, 12 ) === 'box install ' ){
 		bot.action( to, 'giggles' );
-	}else if ( text.substr( 0,1 ) === '!' ){
+	}else if ( text.substr( 0, 1 ) === '!' && text.split(' ').length == 1 ){
 		docs( to, text.slice( 1 ) );
 	}else if ( text.slice( -5 ) === ' over' ){
 		bot.say( to, "KSHHHK" );
+	}else if ( text.substr( 0, 1 ) === '^' && text.length >= 4 && text.split(' ').length === 1 ){
+		var url = text.split('');
+		url.shift();
+		url = url.join('').toLowerCase();
+		url = url.replace('https://', '');
+		url = url.replace('http://', '');
+		isup( url, function(err, up){
+			bot.say( to, url + " is " + (up ? "up" : "down") + " for me..." );
+		});
 	}
 });
 
