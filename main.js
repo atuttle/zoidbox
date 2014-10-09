@@ -1,7 +1,7 @@
 'use strict';
 
 var config = {
-	channels: [ '##coldfusion' ]
+	channels: [ '##coldfusion', '#zoidbox' ]
 	,server: 'irc.freenode.net'
 	,botName: 'zoidbox'
 };
@@ -12,8 +12,9 @@ if (env === 'dev'){
 }
 
 var irc = require( 'irc' );
+var isup = require( 'is-up' );
 var cfdocs = require( './cfdocs' );
-var isup = require('is-up');
+var gifs = require( './gifs' );
 
 var bot = new irc.Client( config.server, config.botName, { channels: config.channels } );
 
@@ -35,6 +36,17 @@ bot.addListener( "message#", function( from, to, text /*, message*/ ){
 		isup( url, function(err, up){
 			bot.say( to, url + " is " + (up ? "up" : "down") + " for me..." );
 		});
+	}else if ( text.substr( 0, 4 ) === "gif:" && text.length >= 5 ){
+		console.log('getting gif for: ', text.substr(4) );
+		gifs( text.substr(4), function(err, url){
+			if (err){
+				bot.say( to, err );
+			}else{
+				bot.say( to, url );
+			}
+		});
+	}else{
+		console.log(text);
 	}
 });
 
