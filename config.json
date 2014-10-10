@@ -1,0 +1,11 @@
+{
+	 "channels": [ "#ryanguilltest" ]
+	,"server": "irc.freenode.net"
+	,"botName": "guillbot2"
+	,"redis_port": 6379
+	,"redis_host": "redis.ryanguill.com"
+	,"redis_auth_pass": "batman"
+	,"ops": ["ryanguill"]
+	,"debug": true
+	,"karmaCooldown": 60
+}
