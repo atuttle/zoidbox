@@ -6,6 +6,6 @@
 	,"redis_host": ""
 	,"redis_auth_pass": ""
 	,"ops": [ "ryanguill", "fusiongrokker"]
-	,"debug": false
+	,"debug": true
 	,"karmaCooldown": 60
 }
