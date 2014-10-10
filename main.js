@@ -156,6 +156,8 @@ redis.on("ready", function(){
 			emit.emit("gifs", from, to, text);
 		} else if (text.toLowerCase().indexOf(botName.toLowerCase()) !== -1) {
 			emit.emit("mention", from, to, text);
+		} else if ( text.substr(0,1) === '?') {
+			emit.emit("google", from, to, text);
 		}
 	});
 });
@@ -336,6 +338,14 @@ emit.on("deop", function(from, to, text) {
 
 //karma
 
+function allowedKarma( nick ) {
+	var banned = ["choop"];
+	if (banned.indexOf(nick) > -1) {
+		return false;
+	}
+	return true;
+}
+
 function incrKarma(channel, nick, giver, incrby) {
 	redis.hincrby(botName + "." + channel + ".karma", nick.toLowerCase(), incrby);
 	redis.hincrby(botName + "." + channel + ".karma_giver", giver.toLowerCase(), incrby);
@@ -386,6 +396,8 @@ function getLastKarmaGive(channel, giver, callback) {
 function addKarma(nick, from, to, text) {
 	if (nick.toLowerCase() === from.toLowerCase()) {
 		bot.say(to, "You can't give karma to yourself ಠ_ಠ");
+	} else if (!allowedKarma(nick.toLowerCase()) {
+		bot.say(to, "You can't give karma to " + nick.toLowerCase() + ".");
 	} else {
 		if (!isCurrentlyOnline(to, nick)) {
 			bot.say(to, "who is " + nick + "?");
@@ -627,6 +639,7 @@ var zoidisms = [
 	, 'He\'s a Wizard'
 	, 'the giants'
 	, 'occupy me {from}'
+	, 'this is some podman-level nonsense'
 ];
 
 function randomZoidism(from){
@@ -662,3 +675,9 @@ emit.on("gifs", function(from, to, text){
 		}
 	});
 });
+
+// google
+
+emit.on( "google", function ( from, to, text ) {
+	bot.say( to, "https://www.google.com/search?q=" + text.substr( 1 ).replace( /s+/g, '+' ) );
+} );
