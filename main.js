@@ -1,4 +1,3 @@
-
 'use strict';
 
 /*
@@ -157,6 +156,8 @@ redis.on("ready", function(){
 			emit.emit("gifs", from, to, text);
 		} else if (text.toLowerCase().indexOf(botName.toLowerCase()) !== -1) {
 			emit.emit("mention", from, to, text);
+		} else if ( text.substr(0,1) === '?') {
+			emit.emit("google", from, to, text);
 		}
 	});
 });
@@ -663,3 +664,9 @@ emit.on("gifs", function(from, to, text){
 		}
 	});
 });
+
+// google
+
+emit.on( "google", function ( from, to, text ) {
+	bot.say( to, "https://www.google.com/search?q=" + text.substr( 1 ).replace( /s+/g, '+' ) );
+} );
