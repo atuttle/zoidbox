@@ -196,11 +196,11 @@ emit.on("lastseen", function(from, to, text) {
 
 emit.on("help", function(from, to, text) {
 	var keyword = text.replace("#help", "").trim();
-	bot.say(from, "I am zoidbox! Please check my documentation here: https://github.com/atuttle/zoidbox/help.md");
+	bot.say(from, "I am zoidbox! Please check my documentation here: https://github.com/atuttle/zoidbox/blob/master/help.md");
 
 	isOp(from, function(err, data){
 		if (data !== 0) {
-			bot.say(from, "OP Commands are available here: https://github.com/atuttle/zoidbox/opshelp.md");
+			bot.say(from, "OP Commands are available here: https://github.com/atuttle/zoidbox/blob/master/opshelp.md");
 		}
 	});
 	bot.say(from, "I have been running for " + moment(starttime).fromNow(true));
