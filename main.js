@@ -1,48 +1,87 @@
-
+/* jshint laxcomma: true */
 'use strict';
 
 /*
-https://node-irc.readthedocs.org/en/latest/API.html
-https://www.npmjs.org/package/nconf
-https://www.npmjs.org/package/redis
-http://lodash.com/docs
-https://github.com/atuttle/zoidbox
+	https://node-irc.readthedocs.org/en/latest/API.html
+	https://www.npmjs.org/package/nconf
+	https://www.npmjs.org/package/redis
+	http://lodash.com/docs
 */
 
-var fs = require('fs');
+var bot;
+var plugins = []; //populated at runtime
 var conf = require('nconf');
 var irc = require( 'irc' );
+
+(function bootstrap(){
+
+	conf.argv()
+		.env()
+		.file({file: './config.json'})
+		.defaults({
+			'karmaCooldown': 60
+			,'botName': '```zoidbox'
+		});
+
+	bot = new irc.Client(
+		conf.get('server')
+		, conf.get('botName')
+		, {
+			channels: conf.get('channels')
+			,floodProtection: true
+		}
+	);
+
+	//monkeypatch in some utility functions
+	bot.log = log;
+	bot.use = use;
+
+
+	//load all available plugins
+	var walk = require('walk');
+	var walker = walk.walk('./plugins', { followLinks: false });
+	walker.on('file', function(root, stat, next){
+
+		if ( stat.name.slice(-3) === '.js' ){
+			console.log('loading plugin %s/%s', root, stat.name);
+			try {
+				bot.use( require( root + '/' + stat.name ) );
+				plugins.push( root + '/' + stat.name );
+			}catch (err){
+				console.error( err );
+				console.log('----------------------');
+			}
+		}
+
+		next();
+	});
+	walker.on('end', function(){
+		console.log('plugins loaded: %s', plugins);
+	});
+
+})();
+
+function log() {
+	if (conf.get('debug') || false) {
+		console.log( Array.prototype.slice.call(arguments) );
+	}
+}
+function use( plugin ){
+	plugin( bot );
+}
+
+/*
 var redis;
+var fs = require('fs');
 var events = require("events");
 var emit = new events.EventEmitter();
 var _ = require("lodash");
 var moment = require("moment");
 var starttime = Date.now();
 var currentlyOnline = {};
-var cfdocs = require("./cfdocs");
 var isup = require('is-up');
 var gifs = require('./gifs');
 
-
-conf.argv()
-	.env()
-	.file({file: './config.json'});
-
-conf.defaults({
-    'karmaCooldown': 60
-  });
-
-var log = function() {
-	if (conf.get("debug") || false) {
-		console.log( Array.prototype.slice.call(arguments) );
-	}
-}
-
-var botName = conf.get("botName") || 'defaultBotName';
-
-// log(conf.get("botName"));
-// log(conf.get("server"));
-// log(conf.get('channels'));
 
 if (conf.get("REDISTOGO_URL")) {
 	var rtg = require("url").parse(conf.get("REDISTOGO_URL"));
@@ -64,13 +103,11 @@ redis.on("error", function(err){
 })
 
 
-var bot;
 
 redis.on("ready", function(){
 
 	intializeOps();
 
-	bot = new irc.Client( conf.get("server"), conf.get("botName"), { channels: conf.get("channels"), floodProtection: true } );
 
 	bot.addListener("error", function(err) {
 		log("botError", err);
@@ -122,56 +159,55 @@ redis.on("ready", function(){
 			//they are talking to us in a private message, set to to be from
 			to = from;
 		}
-
-		if (text.indexOf("#lastseen") == 0) {
-			emit.emit("lastseen", from, to, text);
-		} else if (text.indexOf("#help") == 0) {
-			//emit.emit("help", from, to, text);
-		} else if (text.indexOf("#ops") == 0) {
-			emit.emit("ops", from, to, text);
-		} else if (text.indexOf("#op") == 0) {
-			emit.emit("op", from, to, text);
-		} else if (text.indexOf("#deop") == 0) {
-			emit.emit("deop", from, to, text);
-		} else if (text.indexOf("#random") == 0) {
-			emit.emit("random", from, to, text);
-		} else if (text.indexOf("#karmagivers") == 0) {
-			emit.emit("karmagivers", from, to, text);
-		} else if (text.indexOf("#karma") == 0) {
-			emit.emit("karma", from, to, text);
-		} else if (text.indexOf("#stats") == 0) {
-			emit.emit("stats", from, to, text);
-		} else if (text.indexOf("box install ") == 0) {
-			bot.action(to, "giggles");
-		} else if (text.indexOf("!") == 0 && text.split(' ').length == 1) {
-			emit.emit("cfdocs", from, to, text);
-		} else if (text.search(/[:,]\s*\+1/g) !== -1) {
-			emit.emit("addkarmaSucceeding", from, to, text);
-		} else if (text.search(/^\+1[:,]*\s*\w*/g) !== -1) {
-			emit.emit("addkarmaPreceeding", from, to, text);
-		} else if (text.slice(-5) === ' over' ){
-			bot.say(to, "KSHHHK");
-		} else if (text.indexOf("^") === 0 && text.length >= 4 && text.split(' ').length === 1) {
-			emit.emit("isup", from, to, text);
-		} else if (text.indexOf("gif:") === 0 && text.length >= 5) {
-			emit.emit("gifs", from, to, text);
-		} else if (text.toLowerCase().indexOf(botName.toLowerCase()) !== -1) {
-			emit.emit("mention", from, to, text);
-		}
+*/
+		// if (text.indexOf("#lastseen") == 0) {
+		// 	emit.emit("lastseen", from, to, text);
+		// } else if (text.indexOf("#help") == 0) {
+		// 	//emit.emit("help", from, to, text);
+		// } else if (text.indexOf("#ops") == 0) {
+		// 	emit.emit("ops", from, to, text);
+		// } else if (text.indexOf("#op") == 0) {
+		// 	emit.emit("op", from, to, text);
+		// } else if (text.indexOf("#deop") == 0) {
+		// 	emit.emit("deop", from, to, text);
+		// } else if (text.indexOf("#random") == 0) {
+		// 	emit.emit("random", from, to, text);
+		// } else if (text.indexOf("#karmagivers") == 0) {
+		// 	emit.emit("karmagivers", from, to, text);
+		// } else if (text.indexOf("#karma") == 0) {
+		// 	emit.emit("karma", from, to, text);
+		// } else if (text.indexOf("#stats") == 0) {
+		// 	emit.emit("stats", from, to, text);
+		// } else if (text.indexOf("box install ") == 0) {
+		// 	bot.action(to, "giggles");
+		// } else if (text.search(/[:,]\s*\+1/g) !== -1) {
+		// 	emit.emit("addkarmaSucceeding", from, to, text);
+		// } else if (text.search(/^\+1[:,]*\s*\w*/g) !== -1) {
+		// 	emit.emit("addkarmaPreceeding", from, to, text);
+		// } else if (text.slice(-5) === ' over' ){
+		// 	bot.say(to, "KSHHHK");
+		// } else if (text.indexOf("^") === 0 && text.length >= 4 && text.split(' ').length === 1) {
+		// 	emit.emit("isup", from, to, text);
+		// } else if (text.indexOf("gif:") === 0 && text.length >= 5) {
+		// 	emit.emit("gifs", from, to, text);
+		// } else if (text.toLowerCase().indexOf(conf.get("botName").toLowerCase()) !== -1) {
+		// 	emit.emit("mention", from, to, text);
+		// }
+/*
 	});
 });
 
 //lastseen
 
 function setLastSeen (channel, nick) {
-	redis.hset(botName + "." + channel + ".lastseen", nick.toLowerCase(), Date.now());
+	redis.hset(conf.get("botName") + "." + channel + ".lastseen", nick.toLowerCase(), Date.now());
 }
 
 emit.on("lastseen", function(from, to, text) {
 	var nick = text.replace("#lastseen", "").trim();
 
 	if (nick.length) {
-		redis.hget(botName + "." + to + ".lastseen", nick, function(err, data) {
+		redis.hget(conf.get("botName") + "." + to + ".lastseen", nick, function(err, data) {
 			if (data !== null) {
 				var date = new Date(parseInt(data, 10));
 				bot.say(to, "I last saw " + nick + " around " + date.toLocaleString());
@@ -180,7 +216,7 @@ emit.on("lastseen", function(from, to, text) {
 			}
 		});
 	} else {
-		redis.hgetall(botName + "." + to + ".lastseen", function(err, data){
+		redis.hgetall(conf.get("botName") + "." + to + ".lastseen", function(err, data){
 			log(data);
 			if (data !== null) {
 				var people = _.map(_.sortBy(_.map(data, function(item, key) { return [key, item]}), 1).reverse().slice(0, 10), function(item) {return item[0];}).join(", ");
@@ -235,26 +271,26 @@ function intializeOps () {
 	var defaultOps = conf.get("ops") || [];
 	if (defaultOps.length) {
 		_.each(defaultOps, function(item){
-			redis.sadd(botName + ".ops", item.toLowerCase());
+			redis.sadd(conf.get("botName") + ".ops", item.toLowerCase());
 		});
 	}
 }
 
 function setOp (nick) {
-	redis.sadd(botName + ".ops", nick.toLowerCase());
+	redis.sadd(conf.get("botName") + ".ops", nick.toLowerCase());
 }
 
 function deOp (nick) {
-	redis.srem(botName + ".ops", nick.toLowerCase());
+	redis.srem(conf.get("botName") + ".ops", nick.toLowerCase());
 	intializeOps();
 }
 
 function isOp (nick, callback) {
-	redis.sismember(botName + ".ops", nick.toLowerCase(), callback);
+	redis.sismember(conf.get("botName") + ".ops", nick.toLowerCase(), callback);
 }
 
 function getOps (callback) {
-	redis.smembers(botName + ".ops", callback);
+	redis.smembers(conf.get("botName") + ".ops", callback);
 }
 
 emit.on("ops", function(from, to, text) {
@@ -325,49 +361,49 @@ function allowedKarma( nick ) {
 }
 
 function incrKarma(channel, nick, giver, incrby) {
-	redis.hincrby(botName + "." + channel + ".karma", nick.toLowerCase(), incrby);
-	redis.hincrby(botName + "." + channel + ".karma_giver", giver.toLowerCase(), incrby);
+	redis.hincrby(conf.get("botName") + "." + channel + ".karma", nick.toLowerCase(), incrby);
+	redis.hincrby(conf.get("botName") + "." + channel + ".karma_giver", giver.toLowerCase(), incrby);
 	setLastKarmaGive(channel, giver);
 }
 
 function getKarma(channel, nick, callback) {
-	redis.hget(botName + "." + channel + ".karma", nick.toLowerCase(), callback);
+	redis.hget(conf.get("botName") + "." + channel + ".karma", nick.toLowerCase(), callback);
 }
 
 function getKarmaGives(channel, nick, callback) {
-	redis.hget(botName + "." + channel + ".karma_giver", nick.toLowerCase(), callback);
+	redis.hget(conf.get("botName") + "." + channel + ".karma_giver", nick.toLowerCase(), callback);
 }
 
 function getLeaderboard(channel, callback) {
-	redis.hgetall(botName + "." + channel + ".karma", callback);
+	redis.hgetall(conf.get("botName") + "." + channel + ".karma", callback);
 }
 
 function getGiverLeaderboard(channel, callback) {
-	redis.hgetall(botName + "." + channel + ".karma_giver", callback);
+	redis.hgetall(conf.get("botName") + "." + channel + ".karma_giver", callback);
 }
 
 function resetKarma(channel) {
-	redis.del(botName + "." + channel + ".karma");
+	redis.del(conf.get("botName") + "." + channel + ".karma");
 }
 
 function resetKarmaNick(channel, nick) {
-	redis.hset(botName + "." + channel + ".karma", nick.toLowerCase(), 0);
+	redis.hset(conf.get("botName") + "." + channel + ".karma", nick.toLowerCase(), 0);
 }
 
 function resetKarmaGives(channel) {
-	redis.del(botName + "." + channel + ".karma_giver");
+	redis.del(conf.get("botName") + "." + channel + ".karma_giver");
 }
 
 function resetKarmaGivesNick(channel, nick) {
-	redis.hset(botName + "." + channel + ".karma_giver", nick.toLowerCase(), 0);
+	redis.hset(conf.get("botName") + "." + channel + ".karma_giver", nick.toLowerCase(), 0);
 }
 
 function setLastKarmaGive(channel, giver) {
-	redis.hset(botName + "." + channel + ".last_karma_give", giver.toLowerCase(), Date.now());
+	redis.hset(conf.get("botName") + "." + channel + ".last_karma_give", giver.toLowerCase(), Date.now());
 }
 
 function getLastKarmaGive(channel, giver, callback) {
-	redis.hget(botName + "." + channel + ".last_karma_give", giver.toLowerCase(), callback);
+	redis.hget(conf.get("botName") + "." + channel + ".last_karma_give", giver.toLowerCase(), callback);
 }
 
 
@@ -399,11 +435,14 @@ emit.on("addkarmaSucceeding", function(from, to, text) {
 	addKarma(nick, from, to, text);
 });
 
-emit.on("addkarmaPreceeding", function(from, to, text) {
-	var nick = text.replace(/\+1[:,]*/g, '').trim().split(' ');
-	addKarma(nick[0], from, to, text);
-});
+*/
 
+// emit.on("addkarmaPreceeding", function(from, to, text) {
+// 	var nick = text.replace(/\+1[:,]*/g, '').trim().split(' ');
+// 	addKarma(nick[0], from, to, text);
+// });
+
+/*
 emit.on("karma", function(from, to, text){
 	var nick = text.replace("#karma", "").trim();
 
@@ -496,24 +535,24 @@ emit.on("random", function(from, to, text){
 //stats
 
 function countMessage (channel, nick) {
-	redis.hincrby(botName + "." + channel + ".messageCount", channel, 1);
-	redis.hincrby(botName + "." + channel + ".messageCount", nick.toLowerCase(), 1);
+	redis.hincrby(conf.get("botName") + "." + channel + ".messageCount", channel, 1);
+	redis.hincrby(conf.get("botName") + "." + channel + ".messageCount", nick.toLowerCase(), 1);
 }
 
 function getChannelMessageCount(channel, callback) {
-	redis.hget(botName + "." + channel + ".messageCount", channel, callback);
+	redis.hget(conf.get("botName") + "." + channel + ".messageCount", channel, callback);
 }
 
 function getNickMessageCount(channel, nick, callback) {
-	redis.hget(botName + "." + channel + ".messageCount", nick.toLowerCase(), callback);
+	redis.hget(conf.get("botName") + "." + channel + ".messageCount", nick.toLowerCase(), callback);
 }
 
 function getMessageCountLeaderboard(channel, callback) {
-	redis.hgetall(botName + "." + channel + ".messageCount", callback);
+	redis.hgetall(conf.get("botName") + "." + channel + ".messageCount", callback);
 }
 
 function resetStats(channel) {
-	redis.del(botName + "." + channel + ".messageCount");
+	redis.del(conf.get("botName") + "." + channel + ".messageCount");
 }
 
 emit.on("stats", function(from, to, text){
@@ -565,39 +604,6 @@ emit.on("stats", function(from, to, text){
 
 		})
 	}
-});
-
-//cfdocs
-
-function docs(channel, q){
-	q = q.toLowerCase();
-
-	if (q === "cfclient"){
-		return bot.say(channel, '<cfclient></cfclient> → returns a pink slip, because if you use this shit you should be fired. ~ http://www.codecademy.com/en/tracks/javascript');
-	}
-
-	if (q === "cf_socialplugin"){
-		return bot.say(channel, "<cf_socialplugin .. /> → returns a bunch of outdated junk that would have been better as a community project dear god what have we done we should have just given them a package manager like they've been asking for for years ~ http://cfdocs.org/cf_socialplugin");
-	}
-
-	cfdocs( q, function(err, result){
-		if (err !== null){
-			bot.say(channel, err );
-		}else{
-			if (result.type === "tag"){
-				var msg = result.syntax + ' → ' + result.description.replace(/\s+/g, ' ') + ' ~ http://cfdocs.org/' + q;
-			}else{
-				var msg = result.syntax + ' → returns ' + ( result.returns.length ? result.returns : ' nothing' ) + ' ~ http://cfdocs.org/' + q;
-			}
-			bot.say(channel, msg );
-		}
-	});
-
-}
-
-emit.on("cfdocs", function(from, to, text) {
-	log("cfdocs", from, to, text);
-	return docs(to, text.slice(1));
 });
 
 //mention
@@ -653,3 +659,5 @@ emit.on("gifs", function(from, to, text){
 		}
 	});
 });
+
+*/

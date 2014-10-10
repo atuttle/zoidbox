@@ -1,5 +1,5 @@
 {
-  "name": "guillbot",
+  "name": "zoidbox",
   "version": "0.1.0",
   "description": "a more elegant bot for a more civilized age",
   "main": "main.js",
@@ -16,6 +16,7 @@
     "lodash": "^2.4.1",
     "moment": "^2.8.3",
     "nconf": "^0.6.9",
-    "redis": "^0.12.1"
+    "redis": "^0.12.1",
+    "walk": "^2.3.4"
   }
 }
