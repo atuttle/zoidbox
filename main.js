@@ -196,35 +196,14 @@ emit.on("lastseen", function(from, to, text) {
 
 emit.on("help", function(from, to, text) {
 	var keyword = text.replace("#help", "").trim();
-/*
-	bot.say(from, "I am guillbot! Here are the things you can say:");
-	bot.say(from, "    #lastseen - will tell you the last people to leave.");
-	bot.say(from, "    #lastseen nick - will tell you when that person was last seen.");
-	bot.say(from, "    #help - will give you this help message as a private message.");
-	bot.say(from, "    +1 nick or nick: +1 - gives karma to user");
-	bot.say(from, "    #karma - the karma leaderboard for this channel");
-	bot.say(from, "    #karma nick - the karma for that user");
-	bot.say(from, "    #karmagivers - the karma giving leaderboard for this channel");
-	bot.say(from, "    #karmagivers nick - the karma given by that user");
-	bot.say(from, "    #random - pick a random user currently in the chat");
-	bot.say(from, "    #stats - show message counts from the room");
-	bot.say(from, "    #stats nick - show message counts for that user");
-	bot.say(from, "I have been running for " + moment(starttime).fromNow(true));
+	bot.say(from, "I am zoidbox! Please check my documentation here: https://github.com/atuttle/zoidbox/blob/master/help.md");
 
 	isOp(from, function(err, data){
 		if (data !== 0) {
-			bot.say(from, "OP Commands");
-			bot.say(from, "    #ops - get a list of ops.");
-			bot.say(from, "    #op nick");
-			bot.say(from, "    #deop nick");
-			bot.say(from, "    #karma !reset nick");
-			bot.say(from, "    #karma !reset - resets all karma stats");
-			bot.say(from, "    #karmagivers !reset nick");
-			bot.say(from, "    #karmagivers !reset - resets all karma giving stats");
-			bot.say(from, "    #stats !reset - resets all statistics");
+			bot.say(from, "OP Commands are available here: https://github.com/atuttle/zoidbox/blob/master/opshelp.md");
 		}
 	});
-*/
+	bot.say(from, "I have been running for " + moment(starttime).fromNow(true));
 });
 
 function setCurrentlyOnline(channel, nick, isOnline) {
