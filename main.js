@@ -42,7 +42,7 @@ var botName = conf.get("botName") || 'defaultBotName';
 // log(conf.get("botName"));
 // log(conf.get("server"));
 // log(conf.get('channels'));
- 
+
 if (conf.get("REDISTOGO_URL")) {
 	var rtg = require("url").parse(conf.get("REDISTOGO_URL"));
 	redis = require("redis").createClient(rtg.port, rtg.hostname);
@@ -68,7 +68,7 @@ var bot;
 redis.on("ready", function(){
 
 	intializeOps();
-	
+
 	bot = new irc.Client( conf.get("server"), conf.get("botName"), { channels: conf.get("channels"), floodProtection: true } );
 
 	bot.addListener("error", function(err) {
@@ -157,7 +157,7 @@ redis.on("ready", function(){
 		} else if (text.toLowerCase().indexOf(botName.toLowerCase()) !== -1) {
 			emit.emit("mention", from, to, text);
 		}
-	});	
+	});
 });
 
 //lastseen
@@ -367,7 +367,7 @@ function resetKarmaNick(channel, nick) {
 }
 
 function resetKarmaGives(channel) {
-	redis.del(botName + "." + channel + ".karma_giver");	
+	redis.del(botName + "." + channel + ".karma_giver");
 }
 
 function resetKarmaGivesNick(channel, nick) {
@@ -388,18 +388,18 @@ function addKarma(nick, from, to, text) {
 		bot.say(to, "You can't give karma to yourself ಠ_ಠ");
 	} else {
 		if (!isCurrentlyOnline(to, nick)) {
-			bot.say(to, "who is " + nick + "?");		
+			bot.say(to, "who is " + nick + "?");
 		} else {
 			getLastKarmaGive(to, from, function(err, data){
 				//log(Date.now() - data, conf.get("karmaCooldown"));
 				if (Date.now() - data > conf.get("karmaCooldown") * 1000){
 					incrKarma(to, nick, from, 1);
-					bot.say(to, from + " gives karma to " + nick);		
+					bot.say(to, from + " gives karma to " + nick);
 				} else {
 					bot.say(to, "easy " + from + ".")
-				}				
+				}
 			});
-			
+
 		}
 	}
 }
@@ -426,14 +426,14 @@ emit.on("karma", function(from, to, text){
 					var parts = nick.toLowerCase().split(" ");
 					if (parts.length == 1) {
 						resetKarma(to);
-						bot.say(to, "All karma has been reset.");		
+						bot.say(to, "All karma has been reset.");
 					} else {
 						nick = parts.slice(-(parts.length-1)).join(" ");
 						resetKarmaNick(to, nick);
-						bot.say(to, "karma for " + nick + " has been reset.");		
+						bot.say(to, "karma for " + nick + " has been reset.");
 					}
-					
-				}				
+
+				}
 			});
 		} else {
 			getKarma(to, nick, function(err, data){
@@ -449,7 +449,7 @@ emit.on("karma", function(from, to, text){
 			log("getLeaderboard", err, data);
 
 			var leaders = _.map(_.sortBy(_.map(data, function(item, key) { return [key, item]}), function(value){return _.parseInt(value[1], 10);}).reverse().slice(0, 10), function(item) {return item[0] + " (" + item[1] + ")";}).join(", ");
-			
+
 			bot.say(to, "Current karma leaders are: " + leaders);
 		})
 	}
@@ -467,14 +467,14 @@ emit.on("karmagivers", function(from, to, text){
 					var parts = nick.toLowerCase().split(" ");
 					if (parts.length == 1) {
 						resetKarmaGives(to);
-						bot.say(to, "All karma gives has been reset.");		
+						bot.say(to, "All karma gives has been reset.");
 					} else {
 						nick = parts.slice(-(parts.length-1)).join(" ");
 						resetKarmaGivesNick(to, nick);
-						bot.say(to, "karma gives for " + nick + " has been reset.");		
+						bot.say(to, "karma gives for " + nick + " has been reset.");
 					}
-					
-				}				
+
+				}
 			});
 		} else {
 			getKarmaGives(to, nick, function(err, data){
@@ -490,7 +490,7 @@ emit.on("karmagivers", function(from, to, text){
 			log("getGiverLeaderboard", err, data);
 
 			var leaders = _.map(_.sortBy(_.map(data, function(item, key) { return [key, item]}), function(value){return _.parseInt(value[1], 10);}).reverse().slice(0, 10), function(item) {return item[0] + " (" + item[1] + ")";}).join(", ");
-			
+
 			bot.say(to, "Current karma giving leaders are: " + leaders);
 		})
 	}
@@ -536,8 +536,8 @@ emit.on("stats", function(from, to, text){
 					bot.say(to, "You must be an op to do that.")
 				} else {
 					resetStats(to);
-					bot.say(to, "All stats have been reset.");		
-				}				
+					bot.say(to, "All stats have been reset.");
+				}
 			});
 		} else {
 			getNickMessageCount(to, nick, function(err, data){
@@ -555,7 +555,7 @@ emit.on("stats", function(from, to, text){
 				var leaders = _.map(
 									_.sortBy(
 										_.filter(
-												_.map(data, function(item, key) { 
+												_.map(data, function(item, key) {
 													return [key, item]
 												}), function(item) {
 													return item[0] !== to;
@@ -568,11 +568,11 @@ emit.on("stats", function(from, to, text){
 							, function(item) {
 								return item[0] + ": " + item[1] + " (" + _.parseInt((item[1] / channelMessageCount) * 100, 10) + "%)";
 							}).join(", ");
-			
-				bot.say(to, "Total Messages: " + channelMessageCount + ". Most talkative users are: " + leaders);	
+
+				bot.say(to, "Total Messages: " + channelMessageCount + ". Most talkative users are: " + leaders);
 				bot.say(to, "I have been running for " + moment(starttime).fromNow(true));
 			});
-			
+
 		})
 	}
 });
@@ -647,7 +647,7 @@ emit.on("isup", function(from, to, text) {
 	url = url.replace('https://', '');
 	url = url.replace('http://', '');
 	isup(url, function(err, up){
-		bot.say(to, url + " is " + (up ? "up" : "down") + " for me" + (up ? "..." : " too.");
+		bot.say(to, url + " is " + (up ? "up" : "down") + " for me" + (up ? "..." : " too.") );
 	});
 });
 
