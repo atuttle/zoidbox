@@ -145,8 +145,6 @@ redis.on("ready", function(){
 		// 	emit.emit("addkarmaSucceeding", from, to, text);
 		// } else if (text.search(/^\+1[:,]*\s*\w*/g) !== -1) {
 		// 	emit.emit("addkarmaPreceeding", from, to, text);
-		// } else if (text.indexOf("^") === 0 && text.length >= 4 && text.split(' ').length === 1) {
-		// 	emit.emit("isup", from, to, text);
 		// }
 /*
 	});
@@ -466,14 +464,6 @@ emit.on("stats", function(from, to, text){
 //isup
 
 emit.on("isup", function(from, to, text) {
-	var url = text.split('');
-	url.shift();
-	url = url.join('').toLowerCase();
-	url = url.replace('https://', '');
-	url = url.replace('http://', '');
-	isup(url, function(err, up){
-		bot.say(to, url + " is " + (up ? "up" : "down") + " for me" + (up ? "..." : " too.") );
-	});
 });
 
 */
