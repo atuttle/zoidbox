@@ -80,9 +80,6 @@ var emit = new events.EventEmitter();
 var moment = require("moment");
 var currentlyOnline = {};
 var isup = require('is-up');
-var gifs = require('./gifs');
-
-
 
 
 redis.on("ready", function(){
@@ -154,8 +151,6 @@ redis.on("ready", function(){
 		// 	bot.say(to, "KSHHHK");
 		// } else if (text.indexOf("^") === 0 && text.length >= 4 && text.split(' ').length === 1) {
 		// 	emit.emit("isup", from, to, text);
-		// } else if (text.indexOf("gif:") === 0 && text.length >= 5) {
-		// 	emit.emit("gifs", from, to, text);
 		// } else if (text.toLowerCase().indexOf(conf.get("botName").toLowerCase()) !== -1) {
 		// 	emit.emit("mention", from, to, text);
 		// }
@@ -513,18 +508,6 @@ emit.on("isup", function(from, to, text) {
 	url = url.replace('http://', '');
 	isup(url, function(err, up){
 		bot.say(to, url + " is " + (up ? "up" : "down") + " for me" + (up ? "..." : " too.") );
-	});
-});
-
-//gifs
-
-emit.on("gifs", function(from, to, text){
-	gifs(text.substr(4), function(err, url){
-		if (err){
-			bot.say(to, err);
-		}else{
-			bot.say(to, url);
-		}
 	});
 });
 
