@@ -141,18 +141,12 @@ redis.on("ready", function(){
 		// 	emit.emit("karma", from, to, text);
 		// } else if (text.indexOf("#stats") == 0) {
 		// 	emit.emit("stats", from, to, text);
-		// } else if (text.indexOf("box install ") == 0) {
-		// 	bot.action(to, "giggles");
 		// } else if (text.search(/[:,]\s*\+1/g) !== -1) {
 		// 	emit.emit("addkarmaSucceeding", from, to, text);
 		// } else if (text.search(/^\+1[:,]*\s*\w*/g) !== -1) {
 		// 	emit.emit("addkarmaPreceeding", from, to, text);
-		// } else if (text.slice(-5) === ' over' ){
-		// 	bot.say(to, "KSHHHK");
 		// } else if (text.indexOf("^") === 0 && text.length >= 4 && text.split(' ').length === 1) {
 		// 	emit.emit("isup", from, to, text);
-		// } else if (text.toLowerCase().indexOf(conf.get("botName").toLowerCase()) !== -1) {
-		// 	emit.emit("mention", from, to, text);
 		// }
 /*
 	});
@@ -467,35 +461,6 @@ emit.on("stats", function(from, to, text){
 
 		})
 	}
-});
-
-//mention
-
-var zoidisms = [
-	  'Woohoo!'
-	, 'This is crap people will use every freaking day'
-	, 'Really?!'
-	, 'Hi!'
-	, 'People are freaking ridiculous'
-	, 'awwww'
-	, 'suck it'
-	, 'idiots... they\'re all idiots...'
-	, 'tough shit!'
-	, 'let\'s do it {from}'
-	, 'ok I\'m done'
-	, 'He\'s a Wizard'
-	, 'the giants'
-	, 'occupy me {from}'
-	, 'this is some podman-level nonsense'
-];
-
-function randomZoidism(from){
-	return zoidisms[Math.floor(Math.random() * zoidisms.length)].split("{from}").join(from);
-}
-
-emit.on("mention", function(from, to, text){
-	log("mention", from, to, text);
-	bot.say(to, randomZoidism(from));
 });
 
 //isup
