@@ -31,7 +31,7 @@ module.exports = (function(){
 			if (err !== null){
 				_bot.say(channel, err );
 			}else{
-				var msg;
+				var msg = '';
 				if (result.type === 'tag'){
 					msg = result.syntax + ' → ' + result.description.replace(/\s+/g, ' ') + ' ~ http://cfdocs.org/' + q;
 				}else{
@@ -51,7 +51,7 @@ module.exports = (function(){
 			if ( !error && response.statusCode === 200 ) {
 				var r = JSON.parse(body);
 				callback(null, r);
-			}else if ( response.statusCode === 404 ){
+			} else if ( response.statusCode === 404 ){
 				callback( 'Unable to find docs for `' + q + '`', null );
 			}
 		});
