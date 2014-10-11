@@ -39,6 +39,20 @@ var irc = require( 'irc' );
 	bot.conf = conf;
 
 	//load all available plugins
+	loadPlugins();
+
+})();
+
+function log() {
+	if (conf.get('debug') || false) {
+		console.log( Array.prototype.slice.call(arguments) );
+	}
+}
+function use( plugin ){
+	plugin( bot );
+}
+
+function loadPlugins(){
 	var walk = require('walk');
 	var walker = walk.walk('./plugins', { followLinks: false });
 
@@ -61,16 +75,6 @@ var irc = require( 'irc' );
 	walker.on('end', function(){
 		console.log('plugins loaded: %s', plugins);
 	});
-
-})();
-
-function log() {
-	if (conf.get('debug') || false) {
-		console.log( Array.prototype.slice.call(arguments) );
-	}
-}
-function use( plugin ){
-	plugin( bot );
 }
 
 /*
