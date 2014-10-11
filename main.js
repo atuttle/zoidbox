@@ -16,7 +16,6 @@
 
 	//initialize
 	bot.use( require('./lib/core') );
-	bot.use( require('./lib/ops') );
 	bot.loadPlugins();
 
 	//=====================================================
