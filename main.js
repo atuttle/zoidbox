@@ -6,7 +6,6 @@
 	https://node-irc.readthedocs.org/en/latest/API.html
 	https://www.npmjs.org/package/nconf
 	https://www.npmjs.org/package/redis
-	http://lodash.com/docs
 */
 
 var bot;
@@ -34,7 +33,6 @@ var irc = require( 'irc' );
 	);
 
 	//monkeypatch in some utility functions
-	bot.log = log;
 	bot.use = use;
 	bot.conf = conf;
 
@@ -46,11 +44,6 @@ var irc = require( 'irc' );
 
 })();
 
-function log() {
-	if (conf.get('debug') || false) {
-		console.log( Array.prototype.slice.call(arguments) );
-	}
-}
 function use( plugin ){
 	plugin( bot );
 }
