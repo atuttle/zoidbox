@@ -1,4 +1,5 @@
 /* jshint laxcomma: true */
+/* global require, console */
 'use strict';
 
 /*
@@ -35,11 +36,12 @@ var irc = require( 'irc' );
 	//monkeypatch in some utility functions
 	bot.log = log;
 	bot.use = use;
-
+	bot.conf = conf;
 
 	//load all available plugins
 	var walk = require('walk');
 	var walker = walk.walk('./plugins', { followLinks: false });
+
 	walker.on('file', function(root, stat, next){
 
 		if ( stat.name.slice(-3) === '.js' ){
@@ -55,6 +57,7 @@ var irc = require( 'irc' );
 
 		next();
 	});
+
 	walker.on('end', function(){
 		console.log('plugins loaded: %s', plugins);
 	});
