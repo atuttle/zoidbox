@@ -2,20 +2,9 @@
 /* global require, console */
 'use strict';
 
-/*
-	https://node-irc.readthedocs.org/en/latest/API.html
-	https://www.npmjs.org/package/nconf
-	https://www.npmjs.org/package/redis
-*/
-
-var bot;
-var plugins = []; //populated at runtime
-var conf = require('nconf');
-var irc = require( 'irc' );
-
 (function bootstrap(){
-
-	conf.argv()
+	var conf = require('nconf')
+		.argv()
 		.env()
 		.file({file: './lib/config.json'})
 		.defaults({
@@ -23,56 +12,59 @@ var irc = require( 'irc' );
 			,'botName': '```zoidbox'
 		});
 
-	bot = new irc.Client(
-		conf.get('server')
-		, conf.get('botName')
-		, {
-			channels: conf.get('channels')
-			,floodProtection: true
-		}
-	);
+	var bot = initIRC( conf );
 
-	//monkeypatch in some utility functions
-	bot.use = use;
-	bot.conf = conf;
-
-	//initialize the world
+	//initialize
 	bot.use( require('./lib/core') );
 	bot.use( require('./lib/ops') );
+	bot.loadPlugins();
 
-	//load all available plugins
-	loadPlugins();
+	//=====================================================
 
-})();
-
-function use( plugin ){
-	plugin( bot );
-}
-
-function loadPlugins(){
-	var walk = require('walk');
-	var walker = walk.walk('./plugins', { followLinks: false });
-
-	walker.on('file', function(root, stat, next){
-
-		if ( stat.name.slice(-3) === '.js' ){
-			console.log('loading plugin %s/%s', root, stat.name);
-			try {
-				bot.use( require( root + '/' + stat.name ) );
-				plugins.push( root + '/' + stat.name );
-			}catch (err){
-				console.error( err );
-				console.log('----------------------');
+	function initIRC( conf ){
+		var irc = require( 'irc' );
+		var b = new irc.Client(
+			conf.get('server')
+			, conf.get('botName')
+			, {
+				channels: conf.get('channels')
+				,floodProtection: true
 			}
-		}
+		);
 
-		next();
-	});
+		b.conf = conf;
 
-	walker.on('end', function(){
-		console.log('plugins loaded: %s', plugins);
-	});
-}
+		b.use = function use( plugin ){
+			plugin( bot );
+		};
+
+		b.loadPlugins = function loadPlugins(){
+			var plugins = [];
+			var walk = require('walk');
+			var walker = walk.walk('./plugins', { followLinks: false });
+
+			walker.on('file', function(root, stat, next){
+
+				if ( stat.name.slice(-3) === '.js' ){
+					console.log('loading plugin %s/%s', root, stat.name);
+					try {
+						bot.use( require( root + '/' + stat.name ) );
+						plugins.push( root + '/' + stat.name );
+					}catch (err){
+						console.error( err );
+						console.log('----------------------');
+					}
+				}
+
+				next();
+			});
+
+			walker.on('end', function(){
+				console.log('plugins loaded: %s', plugins);
+			});
+		};
+	}
+})();
 
 /*
 var fs = require('fs');
