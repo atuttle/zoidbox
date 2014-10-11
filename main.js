@@ -1,5 +1,3 @@
-/* jshint laxcomma: true */
-/* global require, console */
 'use strict';
 
 (function bootstrap(){

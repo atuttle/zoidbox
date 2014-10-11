@@ -1,5 +1,3 @@
-/* jshint laxcomma: true */
-/* global module */
 'use strict';
 
 module.exports = (function(){
