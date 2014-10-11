@@ -20,6 +20,18 @@ reset a user's karma
 
 resets all karma stats
 
+### #karma !ban nick
+
+bans nick from receiving karma in the current channel
+
+### #karma !unban nick
+
+restores karma privileges
+
+### #karma !bans
+
+shows who is banned from karma in the current channel
+
 ### #karmagivers !reset nick
 
 reset a karma giver's stats
