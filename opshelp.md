@@ -43,3 +43,7 @@ resets all karma giving stats
 ### #stats !reset
 
 resets all statistics
+
+### #pounces !clear
+
+clear all pending pounces

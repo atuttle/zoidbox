@@ -1,5 +1,17 @@
 # Zoidbox Help
 
+### #help
+
+gives you this help message as a private message.
+
+### #pounce nick message
+
+The next time `nick` joins the room, send them a message on your behalf.
+
+### #pounces
+
+List users that have at least one poune waiting for them.
+
 ### #lastseen
 
 tells you the last people to leave.
@@ -7,10 +19,6 @@ tells you the last people to leave.
 ### #lastseen nick
 
 tells you when that person was last seen.
-
-### #help
-
-gives you this help message as a private message.
 
 ### +1 nick or nick: +1
 
