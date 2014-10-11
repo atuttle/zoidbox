@@ -18,7 +18,7 @@ var irc = require( 'irc' );
 
 	conf.argv()
 		.env()
-		.file({file: './config.json'})
+		.file({file: './lib/config.json'})
 		.defaults({
 			'karmaCooldown': 60
 			,'botName': '```zoidbox'
@@ -37,6 +37,9 @@ var irc = require( 'irc' );
 	bot.log = log;
 	bot.use = use;
 	bot.conf = conf;
+
+	//initialize the world
+	bot.use( require('./lib/core') );
 
 	//load all available plugins
 	loadPlugins();
