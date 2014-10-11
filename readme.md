@@ -4,19 +4,15 @@ An IRC bot that (attempts to) bring the knowledge and wit of @boyzoid to ##coldf
 
 Pull requests welcome!
 
-## Current Abilities
+## Documentation
 
-    zoidbox: {anything}
-    → random zoidism
+Run `#help` in a chat room with zoidbox to be sent a link to the [documentation](https://github.com/atuttle/zoidbox/blob/master/help.md). There's also [ops documentation](https://github.com/atuttle/zoidbox/blob/master/opshelp.md).
 
-    !functionOrTagName
-    → docs for requested function or tag from cfdocs.org
+## Pull Requests Encouraged!
 
-    end your message with a space and the word over
-    → KSHHK
+Please create your additions in the form of a plugin: a `.js` file in the `plugins/` folder. Look at other plugins for examples of how to design them.
 
-    box install {anything}
-    → *giggles*
+Please use jshint! Again, examples of relevant jshint options can be found in the existing plugins.
 
 ## License
 
