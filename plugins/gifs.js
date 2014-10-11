@@ -3,11 +3,7 @@
 
 module.exports = (function(){
 
-	var _bot;
-	var request = require('request');
-
 	return function init( bot ){
-		_bot = bot;
 		bot.on( 'message#', function( from, to, text ){
 			if (text.indexOf('gif:') === 0 && text.length >= 5) {
 				gifme(text.substr(4), function(err, url){
@@ -22,6 +18,7 @@ module.exports = (function(){
 	};
 
 	function gifme(term, callback){
+		var request = require('request');
 		var url = 'http://api.gifme.io/v1/gifs/random?key=rX7kbMzkGu7WJwvG&term=';
 		request( url + term, function(err, result){
 			var response = JSON.parse( result.body );

@@ -456,9 +456,4 @@ emit.on("stats", function(from, to, text){
 	}
 });
 
-//isup
-
-emit.on("isup", function(from, to, text) {
-});
-
 */
