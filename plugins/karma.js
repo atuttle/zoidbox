@@ -76,6 +76,16 @@ module.exports = (function(){
 
 					}
 				});
+            } else if (nick.toLowerCase().split(" ")[0] === "!bans") {
+				bot.ops.isOp(from, function (err, data) {
+					if (data === 0) {
+						bot.say(to, "You must be an op to do that.");
+					} else {
+                        getKarmaBans(to, function(err, data) {
+                            bot.say(to, "Users currently banned from receiving karma in " + to + ": " + data.join(', '));
+                        });
+					}
+				});
 			} else {
 				getKarma(to, nick, function(err, data){
 					if (data !== null && data !== 0) {
@@ -181,6 +191,10 @@ module.exports = (function(){
 
 	function resetKarmaGives(channel) {
 		redis.del(conf.get("botName") + "." + channel + ".karma_giver");
+	}
+
+	function getKarmaBans(channel, callback) {
+		redis.smembers(conf.get("botName") + "." + channel + ".karma_bans", callback);
 	}
 
 	function resetKarmaGivesNick(channel, nick) {
