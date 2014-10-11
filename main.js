@@ -38,6 +38,7 @@ var irc = require( 'irc' );
 
 	//initialize the world
 	bot.use( require('./lib/core') );
+	bot.use( require('./lib/ops') );
 
 	//load all available plugins
 	loadPlugins();
