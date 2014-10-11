@@ -10,12 +10,12 @@ module.exports = (function(){
 	return function init( bot ){
 		_bot = bot;
 		bot.on( 'message#', function( from, to, text ){
-			if (text.indexOf("!") == 0 && text.split(' ').length == 1){
+			if (text.indexOf("!") === 0 && text.split(' ').length === 1){
 				bot.log("cfdocs", from, to, text);
 				return docs(to, text.slice(1));
 			}
 		});
-	}
+	};
 
 	function docs(channel, q){
 		q = q.toLowerCase();
@@ -32,10 +32,11 @@ module.exports = (function(){
 			if (err !== null){
 				_bot.say(channel, err );
 			}else{
+                var msg = '';
 				if (result.type === "tag"){
-					var msg = result.syntax + ' → ' + result.description.replace(/\s+/g, ' ') + ' ~ http://cfdocs.org/' + q;
+					msg = result.syntax + ' → ' + result.description.replace(/\s+/g, ' ') + ' ~ http://cfdocs.org/' + q;
 				}else{
-					var msg = result.syntax + ' → returns ' + ( result.returns.length ? result.returns : ' nothing' ) + ' ~ http://cfdocs.org/' + q;
+					msg = result.syntax + ' → returns ' + ( result.returns.length ? result.returns : ' nothing' ) + ' ~ http://cfdocs.org/' + q;
 				}
 				_bot.say(channel, msg );
 			}
@@ -48,10 +49,10 @@ module.exports = (function(){
 		var full = base + q + '.json';
 
 		request(full, function (error, response, body) {
-			if ( !error && response.statusCode == 200 ) {
+			if ( !error && response.statusCode === 200 ) {
 				var r = JSON.parse(body);
 				callback(null, r);
-			}else if ( response.statusCode == 404 ){
+			} else if ( response.statusCode === 404 ){
 				callback( 'Unable to find docs for `' + q + '`', null );
 			}
 		});

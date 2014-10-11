@@ -10,7 +10,7 @@ module.exports = (function(){
 	var bot,
 		redis,
 		log,
-        conf;
+		conf;
 
 	emit.on("addKarmaSucceeding", function(from, to, text) {
 		var nick = text.replace(/[:,]\s*\+1/g, '').trim();
@@ -23,16 +23,16 @@ module.exports = (function(){
 	});
 
 	emit.on("karma", function(from, to, text){
-        var nick = text.replace("#karma", "").trim();
+		var nick = text.replace("#karma", "").trim();
 
 		if (nick.length) {
 			if (nick.toLowerCase().split(" ")[0] === "!reset") {
-				isOp(from, function(err, data){
-					if (data == 0) {
-						bot.say(to, "You must be an op to do that.")
+				bot.ops.isOp(from, function(err, data){
+					if (data === 0) {
+						bot.say(to, "You must be an op to do that.");
 					} else {
 						var parts = nick.toLowerCase().split(" ");
-						if (parts.length == 1) {
+						if (parts.length === 1) {
 							resetKarma(to);
 							bot.say(to, "All karma has been reset.");
 						} else {
@@ -56,10 +56,10 @@ module.exports = (function(){
 			getLeaderboard(to, function(err, data){
 				log("getLeaderboard", err, data);
 
-				var leaders = _.map(_.sortBy(_.map(data, function(item, key) { return [key, item]}), function(value){return _.parseInt(value[1], 10);}).reverse().slice(0, 10), function(item) {return item[0] + " (" + item[1] + ")";}).join(", ");
+				var leaders = _.map(_.sortBy(_.map(data, function(item, key) { return [key, item];}), function(value){return _.parseInt(value[1], 10);}).reverse().slice(0, 10), function(item) {return item[0] + " (" + item[1] + ")";}).join(", ");
 
 				bot.say(to, "Current karma leaders are: " + leaders);
-			})
+			});
 		}
 	});
 
@@ -68,12 +68,12 @@ module.exports = (function(){
 
 		if (nick.length) {
 			if (nick.toLowerCase().split(" ")[0] === "!reset") {
-				isOp(from, function(err, data){
-					if (data == 0) {
-						bot.say(to, "You must be an op to do that.")
+				bot.ops.isOp(from, function(err, data){
+					if (data === 0) {
+						bot.say(to, "You must be an op to do that.");
 					} else {
 						var parts = nick.toLowerCase().split(" ");
-						if (parts.length == 1) {
+						if (parts.length === 1) {
 							resetKarmaGives(to);
 							bot.say(to, "All karma gives has been reset.");
 						} else {
@@ -97,10 +97,10 @@ module.exports = (function(){
 			getGiverLeaderboard(to, function(err, data){
 				log("getGiverLeaderboard", err, data);
 
-				var leaders = _.map(_.sortBy(_.map(data, function(item, key) { return [key, item]}), function(value){return _.parseInt(value[1], 10);}).reverse().slice(0, 10), function(item) {return item[0] + " (" + item[1] + ")";}).join(", ");
+				var leaders = _.map(_.sortBy(_.map(data, function(item, key) { return [key, item];}), function(value){return _.parseInt(value[1], 10);}).reverse().slice(0, 10), function(item) {return item[0] + " (" + item[1] + ")";}).join(", ");
 
 				bot.say(to, "Current karma giving leaders are: " + leaders);
-			})
+			});
 		}
 	});
 	
@@ -173,7 +173,7 @@ module.exports = (function(){
 						incrKarma(to, nick, from, 1);
 						bot.say(to, from + " gives karma to " + nick);
 					} else {
-						bot.say(to, "easy " + from + ".")
+						bot.say(to, "easy " + from + ".");
 					}
 				});
 
@@ -181,22 +181,22 @@ module.exports = (function(){
 		}
 	}
 
-    return function init (_bot){
+	return function init (_bot){
 		bot = _bot;
 		log = bot.log;
-        conf = bot.conf;
-        redis = bot.redis;
+		conf = bot.conf;
+		redis = bot.redis;
 
 
 		bot.on( 'message#', function (from, to, text){
-            if (text.search(/[:,]\s*\+1/g) !== -1) {
-			 	emit.emit("addKarmaSucceeding", from, to, text);
+			if (text.search(/[:,]\s*\+1/g) !== -1) {
+				emit.emit("addKarmaSucceeding", from, to, text);
 			} else if (text.search(/^\+1[:,]*\s*\w*/g) !== -1) {
-			 	emit.emit("addKarmaPreceding", from, to, text);
-			} else if (text.indexOf("#karmagivers") == 0) {
-			 	emit.emit("karmaGivers", from, to, text);
-			} else if (text.indexOf("#karma") == 0) {
-			 	emit.emit("karma", from, to, text);
+				emit.emit("addKarmaPreceding", from, to, text);
+			} else if (text.indexOf("#karmagivers") === 0) {
+				emit.emit("karmaGivers", from, to, text);
+			} else if (text.indexOf("#karma") === 0) {
+				emit.emit("karma", from, to, text);
 			}
 		});
 	};
