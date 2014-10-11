@@ -23,6 +23,10 @@ module.exports = (function(){
 			,getOps: getOps
 		};
 
+		bot.on("error", function(err) {
+			log("irc error", err);
+		});
+
 		bot.on('message', function( from, to, text){
 
 			bot.log('message', from, to, text);

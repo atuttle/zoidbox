@@ -87,13 +87,6 @@ var gifs = require('./gifs');
 
 redis.on("ready", function(){
 
-	intializeOps();
-
-
-	bot.addListener("error", function(err) {
-		log("botError", err);
-	})
-
 	bot.addListener("part", function(channel, nick, reason, message) {
 		log("part", channel, nick, reason);
 		setLastSeen(channel, nick);
