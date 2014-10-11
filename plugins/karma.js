@@ -27,7 +27,7 @@ module.exports = (function(){
 
 		if (nick.length) {
 			if (nick.toLowerCase().split(" ")[0] === "!reset") {
-				bot.ops.isOp(from, function(err, data){
+				bot.ops.isOp(from, function (err, data) {
 					if (data === 0) {
 						bot.say(to, "You must be an op to do that.");
 					} else {
@@ -36,9 +36,42 @@ module.exports = (function(){
 							resetKarma(to);
 							bot.say(to, "All karma has been reset.");
 						} else {
-							nick = parts.slice(-(parts.length-1)).join(" ");
+							nick = parts.slice(-(parts.length - 1)).join(" ");
 							resetKarmaNick(to, nick);
 							bot.say(to, "karma for " + nick + " has been reset.");
+						}
+
+					}
+				});
+			} else if (nick.toLowerCase().split(" ")[0] === "!ban") {
+				bot.ops.isOp(from, function (err, data) {
+					if (data === 0) {
+						bot.say(to, "You must be an op to do that.");
+					} else {
+						var parts = nick.toLowerCase().split(" ");
+						if (parts.length === 1) {
+							bot.say(to, "Who do you want to ban? #karma !ban nick");
+						} else {
+							nick = parts.slice(-(parts.length - 1)).join(" ");
+							resetKarmaNick(to, nick);
+                            banKarma(to, nick);
+							bot.say(to, nick + " has been banned from receiving karma in " + to + ".");
+						}
+
+					}
+				});
+            } else if (nick.toLowerCase().split(" ")[0] === "!unban") {
+				bot.ops.isOp(from, function (err, data) {
+					if (data === 0) {
+						bot.say(to, "You must be an op to do that.");
+					} else {
+						var parts = nick.toLowerCase().split(" ");
+						if (parts.length === 1) {
+							bot.say(to, "Who do you want to unban? #karma !unban nick");
+						} else {
+							nick = parts.slice(-(parts.length - 1)).join(" ");
+							unbanKarma(to, nick);
+							bot.say(to, nick + " has had karma privileges restored in " + to + ".");
 						}
 
 					}
@@ -89,7 +122,7 @@ module.exports = (function(){
 					if (data !== null && data !== 0) {
 						bot.say(to, nick + " has given " + data.toString() + " karma.");
 					} else {
-						bot.say(to, " " + nick + " hasnt given any karma yet.");
+						bot.say(to, " " + nick + " hasn't given any karma yet.");
 					}
 				});
 			}
@@ -103,14 +136,6 @@ module.exports = (function(){
 			});
 		}
 	});
-	
-	function allowedKarma( nick ) {
-		var banned = ["choop"];
-		if (banned.indexOf(nick) > -1) {
-			return false;
-		}
-		return true;
-	}
 
 	function incrKarma(channel, nick, giver, incrby) {
 		redis.hincrby(conf.get("botName") + "." + channel + ".karma", nick.toLowerCase(), incrby);
@@ -142,6 +167,18 @@ module.exports = (function(){
 		redis.hset(conf.get("botName") + "." + channel + ".karma", nick.toLowerCase(), 0);
 	}
 
+	function banKarma(channel, nick) {
+		redis.sadd(conf.get("botName") + "." + channel + ".karma_bans", nick.toLowerCase());
+	}
+
+	function unbanKarma(channel, nick) {
+		redis.srem(conf.get("botName") + "." + channel + ".karma_bans", nick.toLowerCase());
+	}
+
+    function isBannedFromKarma(channel, nick, callback) {
+        redis.sismember(conf.get("botName") + "." + channel + ".karma_bans", nick.toLowerCase(), callback);
+    }
+
 	function resetKarmaGives(channel) {
 		redis.del(conf.get("botName") + "." + channel + ".karma_giver");
 	}
@@ -161,21 +198,26 @@ module.exports = (function(){
 	function addKarma(nick, from, to, text) {
 		if (nick.toLowerCase() === from.toLowerCase()) {
 			bot.say(to, "You can't give karma to yourself ಠ_ಠ");
-		} else if (!allowedKarma(nick.toLowerCase())) {
-			bot.say(to, "You can't give karma to " + nick.toLowerCase() + ".");
 		} else {
 			if (!bot.isCurrentlyOnline(to, nick)) {
 				bot.say(to, "who is " + nick + "?");
 			} else {
-				getLastKarmaGive(to, from, function(err, data){
-					//log(Date.now() - data, conf.get("karmaCooldown"));
-					if (Date.now() - data > conf.get("karmaCooldown") * 1000){
-						incrKarma(to, nick, from, 1);
-						bot.say(to, from + " gives karma to " + nick);
-					} else {
-						bot.say(to, "easy " + from + ".");
-					}
-				});
+                isBannedFromKarma(to, nick, function(err, data) {
+                    if (data) {
+                        bot.say(to, nick + " is banned from receiving karma in " + to);
+                    } else {
+                        getLastKarmaGive(to, from, function (err, data) {
+                            //log(Date.now() - data, conf.get("karmaCooldown"));
+                            if (Date.now() - data > conf.get("karmaCooldown") * 1000) {
+                                incrKarma(to, nick, from, 1);
+                                bot.say(to, from + " gives karma to " + nick);
+                            } else {
+                                bot.say(to, "easy " + from + ".");
+                            }
+                        });
+                    }
+                });
+
 
 			}
 		}
