@@ -63,6 +63,8 @@
 				console.log('plugins loaded: %s', plugins);
 			});
 		};
+
+		return b;
 	}
 })();
 
