@@ -74,36 +74,15 @@ function use( plugin ){
 }
 
 /*
-var redis;
 var fs = require('fs');
 var events = require("events");
 var emit = new events.EventEmitter();
-var _ = require("lodash");
 var moment = require("moment");
 var starttime = Date.now();
 var currentlyOnline = {};
 var isup = require('is-up');
 var gifs = require('./gifs');
 
-
-if (conf.get("REDISTOGO_URL")) {
-	var rtg = require("url").parse(conf.get("REDISTOGO_URL"));
-	redis = require("redis").createClient(rtg.port, rtg.hostname);
-	redis.auth(rtg.auth.split(":")[1]);
-} else {
-	redis = require("redis").createClient(conf.get("redis_port"), conf.get("redis_host"), {});
-	if (conf.get("redis_auth_pass")) {
-		redis.auth(conf.get("redis_auth_pass"), function(err, data) {
-			if (err) {
-				log("redisClientAuthError:", err, data);
-			}
-		})
-	}
-}
-
-redis.on("error", function(err){
-	log("redisClientError:", err);
-})
 
 
 
@@ -167,12 +146,6 @@ redis.on("ready", function(){
 		// 	emit.emit("lastseen", from, to, text);
 		// } else if (text.indexOf("#help") == 0) {
 		// 	//emit.emit("help", from, to, text);
-		// } else if (text.indexOf("#ops") == 0) {
-		// 	emit.emit("ops", from, to, text);
-		// } else if (text.indexOf("#op") == 0) {
-		// 	emit.emit("op", from, to, text);
-		// } else if (text.indexOf("#deop") == 0) {
-		// 	emit.emit("deop", from, to, text);
 		// } else if (text.indexOf("#random") == 0) {
 		// 	emit.emit("random", from, to, text);
 		// } else if (text.indexOf("#karmagivers") == 0) {
@@ -267,91 +240,6 @@ function isCurrentlyOnline(channel, nick) {
 	return !_.isUndefined(currentlyOnline[channel + "." + nick.toLowerCase()])
 }
 
-
-//ops
-
-function intializeOps () {
-	var defaultOps = conf.get("ops") || [];
-	if (defaultOps.length) {
-		_.each(defaultOps, function(item){
-			redis.sadd(conf.get("botName") + ".ops", item.toLowerCase());
-		});
-	}
-}
-
-function setOp (nick) {
-	redis.sadd(conf.get("botName") + ".ops", nick.toLowerCase());
-}
-
-function deOp (nick) {
-	redis.srem(conf.get("botName") + ".ops", nick.toLowerCase());
-	intializeOps();
-}
-
-function isOp (nick, callback) {
-	redis.sismember(conf.get("botName") + ".ops", nick.toLowerCase(), callback);
-}
-
-function getOps (callback) {
-	redis.smembers(conf.get("botName") + ".ops", callback);
-}
-
-emit.on("ops", function(from, to, text) {
-	getOps(function(err, data){
-		if (data.length) {
-			bot.say(to, "Ops are currently: " + data.join(", "))
-		} else {
-			bot.say(to, "I have no ops :(");
-		}
-	});
-});
-
-emit.on("op", function(from, to, text) {
-	//make sure the from is an op
-	isOp(from, function(err, data){
-		if (data == 0) {
-			bot.say(to, "You must be an op.")
-		} else {
-			var nick = text.replace("#op", "").trim();
-
-			if (!nick.length) {
-				bot.say(to, "who do you want to op? use #op nick");
-			} else {
-				isOp(nick, function(err, data){
-					if (data == 0) {
-						setOp(nick);
-						bot.say(to, nick + " is now an op.");
-					} else {
-						bot.say(to, nick + " is already an op.");
-					}
-				})
-			}
-		}
-	});
-});
-
-emit.on("deop", function(from, to, text) {
-	isOp(from, function(err, data){
-		if (data == 0) {
-			bot.say(to, "You must be an op.")
-		} else {
-			var nick = text.replace("#deop", "").trim();
-
-			if (!nick.length) {
-				bot.say(to, "who do you want to deop? use #deop nick");
-			} else {
-				isOp(nick, function(err, data){
-					if (data == 0) {
-						bot.say(to, nick + " isnt an op.");
-					} else {
-						deOp(nick);
-						bot.say(to, nick + " is no longer an op.");
-					}
-				})
-			}
-		}
-	});
-});
 
 //karma
 
