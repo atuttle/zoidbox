@@ -78,7 +78,6 @@ var fs = require('fs');
 var events = require("events");
 var emit = new events.EventEmitter();
 var moment = require("moment");
-var starttime = Date.now();
 var currentlyOnline = {};
 var isup = require('is-up');
 var gifs = require('./gifs');
@@ -144,8 +143,6 @@ redis.on("ready", function(){
 */
 		// if (text.indexOf("#lastseen") == 0) {
 		// 	emit.emit("lastseen", from, to, text);
-		// } else if (text.indexOf("#help") == 0) {
-		// 	//emit.emit("help", from, to, text);
 		// } else if (text.indexOf("#random") == 0) {
 		// 	emit.emit("random", from, to, text);
 		// } else if (text.indexOf("#karmagivers") == 0) {
@@ -204,19 +201,6 @@ emit.on("lastseen", function(from, to, text) {
 	}
 });
 
-//help
-
-emit.on("help", function(from, to, text) {
-	var keyword = text.replace("#help", "").trim();
-	bot.say(from, "I am zoidbox! Please check my documentation here: https://github.com/atuttle/zoidbox/blob/master/help.md");
-
-	isOp(from, function(err, data){
-		if (data !== 0) {
-			bot.say(from, "OP Commands are available here: https://github.com/atuttle/zoidbox/blob/master/opshelp.md");
-		}
-	});
-	bot.say(from, "I have been running for " + moment(starttime).fromNow(true));
-});
 
 function setCurrentlyOnline(channel, nick, isOnline) {
 	if (_.isBoolean(isOnline)) {

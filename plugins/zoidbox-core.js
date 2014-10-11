@@ -7,6 +7,8 @@ module.exports = (function(){
 	var bot;
 	var redis;
 	var _ = require('lodash');
+	var moment = require('moment');
+	var starttime = Date.now();
 
 	return function init( _bot ){
 		bot = _bot;
@@ -25,7 +27,20 @@ module.exports = (function(){
 
 			bot.log('message', from, to, text);
 
-			if (text.indexOf('#ops') === 0) {
+			if (text.indexOf('#help') === 0) {
+
+				// var keyword = text.replace('#help', '').trim();
+				bot.say(from, 'I am zoidbox! Please check my documentation here: https://github.com/atuttle/zoidbox/blob/master/help.md');
+
+				isOp(from, function(err, data){
+					if (data !== 0) {
+						bot.say(from, 'OP Commands are available here: https://github.com/atuttle/zoidbox/blob/master/opshelp.md');
+					}
+				});
+				bot.say(from, 'I have been running for ' + moment(starttime).fromNow(true));
+
+			} else if (text.indexOf('#ops') === 0) {
+
 				getOps(function(err, data){
 					if (data.length) {
 						bot.say(to, 'Ops are currently: ' + data.join(', '));
@@ -33,7 +48,9 @@ module.exports = (function(){
 						bot.say(to, 'I have no ops :(');
 					}
 				});
+
 			} else if (text.indexOf('#op') === 0) {
+
 				//make sure the from is an op
 				isOp(from, function(err, data){
 					if (data === 0) {
@@ -55,7 +72,9 @@ module.exports = (function(){
 						}
 					}
 				});
+
 			} else if (text.indexOf('#deop') === 0) {
+
 				//make sure the from is an op
 				isOp(from, function(err, data){
 					if (data === 0) {
