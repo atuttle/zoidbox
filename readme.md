@@ -10,9 +10,9 @@ Run `#help` in a chat room with zoidbox to be sent a link to the [documentation]
 
 ## Pull Requests Encouraged!
 
-Please create your additions in the form of a plugin: a `.js` file in the `plugins/` folder. Look at other plugins for examples of how to design them.
+New commands can be added in the form of a plugin: a `.js` file in the `plugins/` folder. Look at other plugins for examples of how to design them.
 
-Please use jshint! Again, examples of relevant jshint options can be found in the existing plugins.
+**Please use JSHint! JSHint options have been set in `.jshintrc`**
 
 ## License
 
