@@ -8,6 +8,10 @@ module.exports = (function(){
 		_bot = bot;
 		bot.on( 'message#', function( from, to, text ){
 
+			if ( from.toLowerCase() === bot.conf.get('botName').toLowerCase() ){
+				return;
+			}
+
 			if (text.indexOf('box install ') === 0) {
 				bot.action(to, 'giggles');
 			} else if (text.slice(-5) === ' over' ){
