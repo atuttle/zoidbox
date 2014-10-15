@@ -20,7 +20,15 @@ module.exports = (function(){
 		var request = require('request');
 		var url = 'http://api.gifme.io/v1/gifs/random?key=rX7kbMzkGu7WJwvG&term=';
 		request( url + term, function(err, result){
-			var response = JSON.parse( result.body );
+			if( err ){
+				callback('Sorry, looks like there was a problem with the api... http://i.imgur.com/amCuffe.gif');
+				return console.error( err );
+			}
+			try {
+				var response = JSON.parse( result.body );
+			}catch(e){
+				return callback('Sorry, the API returned a bunch of crap. http://i.imgur.com/fjmMVba.gif');
+			}
 
 			if (response.status !== 200) return callback( 'oops, looks like shit\'s broke, yo.', null );
 			else return callback( null, response.gif.gif );
