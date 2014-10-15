@@ -94,6 +94,11 @@ module.exports = (function(){
 		bot.say(to, 'eeny,  meeny,  miny, ... ' + currentlyOnlineUsers[_.random(0, currentlyOnlineUsers.length-1)]);
 	});
 
+	emit.on('currentlyonline', function(from, to) {
+		var currentlyOnlineUsers = getCurrentlyOnline(to);
+		bot.say(to, 'I see: ' + currentlyOnlineUsers.join(', '));
+	});
+
 	function setLastSeen (channel, nick) {
 		redis.hset(conf.get('botName') + '.' + channel + '.lastseen', nick.toLowerCase(), Date.now());
 	}
@@ -101,8 +106,10 @@ module.exports = (function(){
 	function setCurrentlyOnline(channel, nick, isOnline) {
 		if (_.isBoolean(isOnline)) {
 			if (isOnline) {
+                log('setCurrentlyOnline:', channel, nick, isOnline);
 				currentlyOnline[channel + '.' + nick.toLowerCase()] = 1;
 			} else {
+                log('clearingCurrentlyOnline:', channel, nick, isOnline);
 				delete currentlyOnline[channel + '.' + nick.toLowerCase()];
 			}
 		}
@@ -117,6 +124,7 @@ module.exports = (function(){
 	}
 
 	function isCurrentlyOnline(channel, nick) {
+        log('isCurrentlyOnline:', channel, nick, currentlyOnline, currentlyOnline[channel + '.' + nick.toLowerCase()]);
 		return !_.isUndefined(currentlyOnline[channel + '.' + nick.toLowerCase()]);
 	}
 
@@ -153,10 +161,12 @@ module.exports = (function(){
 			setCurrentlyOnline(channel, nick, false);
 		});
 
-		bot.addListener('quit', function(channel, nick, reason) {
-			log('quit', channel, nick, reason);
-			setLastSeen(channel, nick);
-			setCurrentlyOnline(channel, nick, false);
+		bot.addListener('quit', function(nick, reason, channels) {
+			log('quit', channels, nick, reason);
+            _.each(channels, function(channel) {
+                setLastSeen(channel, nick);
+                setCurrentlyOnline(channel, nick, false);
+            });
 		});
 
 		bot.addListener('join', function(channel, nick, message){
@@ -175,11 +185,14 @@ module.exports = (function(){
 
 		});
 
-		bot.addListener('nick', function(oldNick, newNick, channel) {
-			setLastSeen(channel, oldNick);
-			setLastSeen(channel, newNick);
-			setCurrentlyOnline(channel, oldNick, false);
-			setCurrentlyOnline(channel, newNick, true);
+		bot.addListener('nick', function(oldNick, newNick, channels) {
+            log('nick', oldNick, newNick, channels);
+            _.each(channels, function(channel) {
+                setLastSeen(channel, oldNick);
+                setLastSeen(channel, newNick);
+                setCurrentlyOnline(channel, oldNick, false);
+                setCurrentlyOnline(channel, newNick, true);
+            });
 		});
 
 		bot.addListener('message', function( from, to, text){
@@ -198,7 +211,10 @@ module.exports = (function(){
 				emit.emit('stats', from, to, text);
 			} else if (text.indexOf('#random') === 0) {
 				emit.emit('random', from, to, text);
+			} else if (text.indexOf('#currentlyonline') === 0) {
+				emit.emit('currentlyonline', from, to, text);
 			}
+
 		});
 
 		bot.getCurrentlyOnline = getCurrentlyOnline;

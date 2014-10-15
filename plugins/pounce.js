@@ -49,8 +49,10 @@ module.exports = (function(){
 				}
 
 			}
-		}).on( 'nick', function( old, nick, chan ){
-			checkAndPounce( chan, nick );
+		}).on( 'nick', function( old, nick, channels ){
+            _.each(channels, function(chan) {
+                checkAndPounce(chan, nick);
+            });
 		}).on( 'join', function( chan, nick ){
 			checkAndPounce( chan, nick );
 		}).on( 'names', function( chan, nicks ){
