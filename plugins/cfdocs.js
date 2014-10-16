@@ -104,14 +104,14 @@ module.exports = (function(){
                 return;
             }
 
-            var hits = ' (' + data + ' hit' + (_.parseInt(data, 10) !== 1 ? 's' : '') + ')';
+            var hits = '(' + data + ' matches' + (_.parseInt(data, 10) !== 1 ? 's' : '') + ') ';
 
             if (q === 'cfclient'){
-                return bot.say(channel, '<cfclient></cfclient> → returns a pink slip, because if you use this shit you should be fired. ~ http://www.codecademy.com/en/tracks/javascript' + hits);
+                return bot.say(channel, hits + '<cfclient></cfclient> → returns a pink slip, because if you use this shit you should be fired. ~ http://www.codecademy.com/en/tracks/javascript');
             }
 
             if (q === 'cf_socialplugin'){
-                return bot.say(channel, '<cf_socialplugin .. /> → returns a bunch of outdated junk that would have been better as a community project dear god what have we done... we should have just given them a package manager like they\'ve been requesting for years ~ http://cfdocs.org/cf_socialplugin' + hits);
+                return bot.say(channel, hits + '<cf_socialplugin .. /> → returns a bunch of outdated junk that would have been better as a community project dear god what have we done... we should have just given them a package manager like they\'ve been requesting for years ~ http://cfdocs.org/cf_socialplugin');
             }
 
             docsApi( q, function(err, result){
@@ -124,7 +124,7 @@ module.exports = (function(){
                     }else{
                         msg = result.syntax + ' → returns ' + ( result.returns.length ? result.returns : ' nothing' ) + ' ~ http://cfdocs.org/' + q;
                     }
-                    bot.say(channel, msg + hits );
+                    bot.say(channel, hits + msg );
                 }
             });
         });
