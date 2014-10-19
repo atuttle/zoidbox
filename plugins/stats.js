@@ -56,7 +56,7 @@ module.exports = (function(){
                 getChannels(function(err, data){
                     bot.say(to, 'I have data for the following channels: ' + data.join(', '));
                     _.each(data, function(channel) {
-                        displayStatsForChannel(channel);
+                        displayStatsForChannel(channel, to);
                     });
                 });
             } else {
@@ -69,7 +69,7 @@ module.exports = (function(){
 				});
 			}
 		} else {
-            displayStatsForChannel(to);
+            displayStatsForChannel(to, to);
 		}
 	});
 
@@ -83,7 +83,7 @@ module.exports = (function(){
 		bot.say(to, 'I see: ' + currentlyOnlineUsers.join(', '));
 	});
 
-    function displayStatsForChannel (channel) {
+    function displayStatsForChannel (channel, replyToChannel) {
         getChannelMessageCount(channel, function(err, channelMessageCount){
             getMessageCountLeaderboard(channel, function(err, data){
                 log('getMessageCountLeaderboard', err, data);
@@ -104,8 +104,8 @@ module.exports = (function(){
                                 return item[0] + ': ' + item[1] + ' (' + _.parseInt((item[1] / channelMessageCount) * 100, 10) + '%)';
                             }).join(', ');
 
-                bot.say(channel, 'Total Messages for ' + channel + ': ' + channelMessageCount + '. Most talkative users are: ' + leaders);
-                bot.say(channel, 'I have been running for ' + moment(bot.starttime).fromNow(true));
+                bot.say(replyToChannel, 'Total Messages for ' + channel + ': ' + channelMessageCount + '. Most talkative users are: ' + leaders);
+                bot.say(replyToChannel, 'I have been running for ' + moment(bot.starttime).fromNow(true));
             });
 
         });
