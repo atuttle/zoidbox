@@ -2,10 +2,12 @@
 
 module.exports = (function(){
 
-	var _bot;
+	var bot,
+        conf;
 
-	return function init( bot ){
-		_bot = bot;
+	return function init (_bot){
+		bot = _bot;
+        conf = bot.conf;
 		bot.on( 'message#', function( from, to, text ){
 
 			if ( from.toLowerCase() === bot.conf.get('botName').toLowerCase() ){
@@ -16,7 +18,7 @@ module.exports = (function(){
 				bot.action(to, 'giggles');
 			} else if (text.slice(-5) === ' over' ){
 				bot.say(to, 'KSHHHK');
-			} else if (text.toLowerCase().indexOf(bot.conf.get('botName').toLowerCase()) !== -1) {
+			} else if (text.toLowerCase().indexOf(bot.conf.get('botName').toLowerCase()) !== -1 && from !== conf.get('botName') && from !== 'zoidbox') {
 				bot.say(to, randomZoidism(from));
 			}
 

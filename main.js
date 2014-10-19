@@ -31,6 +31,7 @@
 		);
 
 		b.conf = conf;
+        b.botName = conf.get('botName')
 
 		b.use = function use( plugin ){
 			plugin( bot );

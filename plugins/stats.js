@@ -17,7 +17,7 @@ module.exports = (function(){
 		var nick = text.replace('#lastseen', '').trim();
 
 		if (nick.length) {
-			redis.hget(conf.get('botName') + '.' + to + '.lastseen', nick, function(err, data) {
+			redis.hget(bot.botName + '.' + to + '.lastseen', nick, function(err, data) {
 				if (data !== null) {
 					var date = new Date(parseInt(data, 10));
 					bot.say(to, 'I last saw ' + nick + ' around ' + date.toLocaleString());
@@ -26,7 +26,7 @@ module.exports = (function(){
 				}
 			});
 		} else {
-			redis.hgetall(conf.get('botName') + '.' + to + '.lastseen', function(err, data){
+			redis.hgetall(bot.botName + '.' + to + '.lastseen', function(err, data){
 				log(data);
 				if (data !== null) {
 					var people = _.map(_.sortBy(_.map(data, function(item, key) { return [key, item];}), 1).reverse().slice(0, 10), function(item) {return item[0];}).join(', ');
@@ -42,16 +42,24 @@ module.exports = (function(){
 		var nick = text.replace('#stats', '').trim();
 
 		if (nick.length) {
-			if (nick.toLowerCase().split(' ')[0] === '!reset') {
-				bot.ops.isOp(from, function(err, data){
-					if (data === 0) {
-						bot.say(to, 'You must be an op to do that.');
-					} else {
-						resetStats(to);
-						bot.say(to, 'All stats have been reset.');
-					}
-				});
-			} else {
+            if (nick.toLowerCase().split(' ')[0] === '!reset') {
+                bot.ops.isOp(from, function (err, data) {
+                    if (data === 0) {
+                        bot.say(to, 'You must be an op to do that.');
+                    } else {
+                        resetStats(to);
+                        bot.say(to, 'All stats have been reset.');
+                    }
+                });
+            } else if (nick.toLowerCase().split(' ')[0] === '!all' && to === '#zoidbox') { //todo: need to change this from hard coded
+                log('!all', to, bot.botName);
+                getChannels(function(err, data){
+                    bot.say(to, 'I have data for the following channels: ' + data.join(', '));
+                    _.each(data, function(channel) {
+                        displayStatsForChannel(channel);
+                    });
+                });
+            } else {
 				getNickMessageCount(to, nick, function(err, data){
 					if (data !== null && data !== 0) {
 						bot.say(to, nick + ' has sent ' + data.toString() + ' messages.');
@@ -61,31 +69,7 @@ module.exports = (function(){
 				});
 			}
 		} else {
-			getChannelMessageCount(to, function(err, channelMessageCount){
-				getMessageCountLeaderboard(to, function(err, data){
-					log('getMessageCountLeaderboard', err, data);
-					var leaders = _.map(
-										_.sortBy(
-											_.filter(
-													_.map(data, function(item, key) {
-														return [key, item];
-													}), function(item) {
-														return item[0] !== to;
-											}) ,
-									function (value){
-										return _.parseInt(value[1], 10);
-									})
-								.reverse()
-								.slice(0, 10),
-                                function(item) {
-									return item[0] + ': ' + item[1] + ' (' + _.parseInt((item[1] / channelMessageCount) * 100, 10) + '%)';
-								}).join(', ');
-
-					bot.say(to, 'Total Messages: ' + channelMessageCount + '. Most talkative users are: ' + leaders);
-					bot.say(to, 'I have been running for ' + moment(bot.starttime).fromNow(true));
-				});
-
-			});
+            displayStatsForChannel(to);
 		}
 	});
 
@@ -99,8 +83,36 @@ module.exports = (function(){
 		bot.say(to, 'I see: ' + currentlyOnlineUsers.join(', '));
 	});
 
+    function displayStatsForChannel (channel) {
+        getChannelMessageCount(channel, function(err, channelMessageCount){
+            getMessageCountLeaderboard(channel, function(err, data){
+                log('getMessageCountLeaderboard', err, data);
+                var leaders = _.map(
+                                    _.sortBy(
+                                        _.filter(
+                                                _.map(data, function(item, key) {
+                                                    return [key, item];
+                                                }), function(item) {
+                                                    return item[0] !== channel;
+                                        }) ,
+                                function (value){
+                                    return _.parseInt(value[1], 10);
+                                })
+                            .reverse()
+                            .slice(0, 10),
+                            function(item) {
+                                return item[0] + ': ' + item[1] + ' (' + _.parseInt((item[1] / channelMessageCount) * 100, 10) + '%)';
+                            }).join(', ');
+
+                bot.say(channel, 'Total Messages for ' + channel + ': ' + channelMessageCount + '. Most talkative users are: ' + leaders);
+                bot.say(channel, 'I have been running for ' + moment(bot.starttime).fromNow(true));
+            });
+
+        });
+    }
+
 	function setLastSeen (channel, nick) {
-		redis.hset(conf.get('botName') + '.' + channel + '.lastseen', nick.toLowerCase(), Date.now());
+		redis.hset(bot.botName + '.' + channel + '.lastseen', nick.toLowerCase(), Date.now());
 	}
 
 	function setCurrentlyOnline(channel, nick, isOnline) {
@@ -115,7 +127,7 @@ module.exports = (function(){
 		}
 	}
 
-	function getCurrentlyOnline(channel) {
+	function getCurrentlyOnline (channel) {
 		return _.map(_.filter(_.keys(currentlyOnline), function(item) {
 				return item.indexOf(channel + '.') === 0;
 			}), function(item) {
@@ -123,30 +135,35 @@ module.exports = (function(){
 			});
 	}
 
-	function isCurrentlyOnline(channel, nick) {
+	function isCurrentlyOnline (channel, nick) {
         log('isCurrentlyOnline:', channel, nick, currentlyOnline, currentlyOnline[channel + '.' + nick.toLowerCase()]);
 		return !_.isUndefined(currentlyOnline[channel + '.' + nick.toLowerCase()]);
 	}
 
+    function getChannels (callback) {
+        redis.smembers(bot.botName + '.channels', callback);
+    }
+
 	function countMessage (channel, nick) {
-		redis.hincrby(conf.get('botName') + '.' + channel + '.messageCount', channel, 1);
-		redis.hincrby(conf.get('botName') + '.' + channel + '.messageCount', nick.toLowerCase(), 1);
+        redis.sadd(bot.botName + '.channels', channel);
+		redis.hincrby(bot.botName + '.' + channel + '.messageCount', channel, 1);
+		redis.hincrby(bot.botName + '.' + channel + '.messageCount', nick.toLowerCase(), 1);
 	}
 
-	function getChannelMessageCount(channel, callback) {
-		redis.hget(conf.get('botName') + '.' + channel + '.messageCount', channel, callback);
+	function getChannelMessageCount (channel, callback) {
+		redis.hget(bot.botName + '.' + channel + '.messageCount', channel, callback);
 	}
 
-	function getNickMessageCount(channel, nick, callback) {
-		redis.hget(conf.get('botName') + '.' + channel + '.messageCount', nick.toLowerCase(), callback);
+	function getNickMessageCount (channel, nick, callback) {
+		redis.hget(bot.botName + '.' + channel + '.messageCount', nick.toLowerCase(), callback);
 	}
 
-	function getMessageCountLeaderboard(channel, callback) {
-		redis.hgetall(conf.get('botName') + '.' + channel + '.messageCount', callback);
+	function getMessageCountLeaderboard (channel, callback) {
+		redis.hgetall(bot.botName + '.' + channel + '.messageCount', callback);
 	}
 
-	function resetStats(channel) {
-		redis.del(conf.get('botName') + '.' + channel + '.messageCount');
+	function resetStats (channel) {
+		redis.del(bot.botName + '.' + channel + '.messageCount');
 	}
 
 	return function init (_bot){
@@ -200,7 +217,7 @@ module.exports = (function(){
 			setLastSeen(to, from);
 			countMessage(to, from);
 
-			if (to === conf.get('botName')) {
+			if (to === bot.botName) {
 				//they are talking to us in a private message, set to to be from
 				to = from;
 			}
