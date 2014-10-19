@@ -48,7 +48,7 @@ module.exports = (function(){
                         bot.say(to, 'You must be an op to do that.');
                     } else {
                         resetStats(to);
-                        bot.say(to, 'All stats have been reset.');
+                        bot.say(to, 'All stats have been reset for: ' + to);
                     }
                 });
             } else if (nick.toLowerCase().split(' ')[0] === '!all' && to === '#zoidbox') { //todo: need to change this from hard coded
@@ -58,6 +58,7 @@ module.exports = (function(){
                     _.each(data, function(channel) {
                         displayStatsForChannel(channel, to);
                     });
+                    displayRunningTime(to);
                 });
             } else {
 				getNickMessageCount(to, nick, function(err, data){
@@ -70,6 +71,7 @@ module.exports = (function(){
 			}
 		} else {
             displayStatsForChannel(to, to);
+            displayRunningTime(to);
 		}
 	});
 
@@ -105,10 +107,12 @@ module.exports = (function(){
                             }).join(', ');
 
                 bot.say(replyToChannel, 'Total Messages for ' + channel + ': ' + channelMessageCount + '. Most talkative users are: ' + leaders);
-                bot.say(replyToChannel, 'I have been running for ' + moment(bot.starttime).fromNow(true));
             });
-
         });
+    }
+
+    function displayRunningTime (replyToChannel) {
+        bot.say(replyToChannel, 'I have been running for ' + moment(bot.starttime).fromNow(true));
     }
 
 	function setLastSeen (channel, nick) {
