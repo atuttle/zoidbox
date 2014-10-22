@@ -104,7 +104,7 @@ module.exports = (function(){
                 return;
             }
 
-            var hits = '(' + data + ' matches' + (_.parseInt(data, 10) !== 1 ? 's' : '') + ') ';
+            var hits = '(' + data + ' match' + (_.parseInt(data, 10) !== 1 ? 'es' : '') + ') ';
 
             if (q === 'cfclient'){
                 return bot.say(channel, hits + '<cfclient></cfclient> → returns a pink slip, because if you use this shit you should be fired. ~ http://www.codecademy.com/en/tracks/javascript');
