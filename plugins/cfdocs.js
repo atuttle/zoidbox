@@ -118,13 +118,22 @@ module.exports = (function(){
                 if (err !== null){
                     bot.say(channel, err );
                 }else{
+                    var theoreticalMax = 400; //rough guess at how many characters we get
+                    var link = ' ~ http://cfdocs.org/' + q;
                     var msg = '';
                     if (result.type === 'tag'){
-                        msg = result.syntax + ' → ' + result.description.replace(/\s+/g, ' ') + ' ~ http://cfdocs.org/' + q;
+                        msg = result.syntax + ' → ' + result.description.replace(/\s+/g, ' ') + link;
                     }else{
-                        msg = result.syntax + ' → returns ' + ( result.returns.length ? result.returns : ' nothing' ) + ' ~ http://cfdocs.org/' + q;
+                        msg = result.syntax + ' → returns ' + ( result.returns.length ? result.returns : ' nothing' ) + link;
                     }
-                    bot.say(channel, hits + msg );
+
+                    var bufferRemaining = theoreticalMax - ( (conf.get('botName').length + 1) + link.length + hits.length );
+                    var fitMsg = msg.substr(0, bufferRemaining);
+                    if (fitMsg !== msg){
+                        fitMsg = fitMsg + '…';
+                    }
+                    fitMsg = hits + fitMsg + link;
+                    bot.say( channel, fitMsg );
                 }
             });
         });
