@@ -51,3 +51,7 @@ will show you stats from all of the rooms the bot is currently in - can only be 
 ### #pounces !clear
 
 clear all pending pounces
+
+### #cooldowns !clear
+
+clear all cooldowns

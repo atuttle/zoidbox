@@ -4,13 +4,17 @@
 
 gives you this help message as a private message.
 
+### #help nick
+
+sends `nick` a private message with help.
+
 ### #pounce nick message
 
 The next time `nick` joins the room, send them a message on your behalf.
 
 ### #pounces
 
-List users that have at least one poune waiting for them.
+List users that have at least one pounce waiting for them.
 
 ### #lastseen
 
@@ -18,11 +22,11 @@ tells you the last people to leave.
 
 ### #lastseen nick
 
-tells you when that person was last seen.
+tells you when `nick` was last seen.
 
 ### +1 nick or nick: +1
 
-gives karma to user
+gives karma to `nick`
 
 ### #karma
 
@@ -30,7 +34,7 @@ the karma leaderboard for this channel
 
 ### #karma nick
 
-the karma for that user
+the karma for `nick`
 
 ### #karmagivers
 
@@ -38,7 +42,7 @@ the karma giving leaderboard for this channel
 
 ### #karmagivers nick
 
-the karma given by that user
+the karma given by that `nick`
 
 ### #random
 
@@ -50,7 +54,7 @@ show message counts from the room
 
 ### #stats nick
 
-show message counts for that user
+show message counts for that `nick`
 
 ### mention zoidbox
 
