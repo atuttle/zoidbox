@@ -42,7 +42,11 @@ resets all karma giving stats
 
 ### #stats !reset
 
-resets all statistics
+resets all statistics for the current room
+
+### #stats !all
+
+will show you stats from all of the rooms the bot is currently in - can only be used from #zoidbox
 
 ### #pounces !clear
 

@@ -60,6 +60,10 @@ posts a random zoidism
 
 posts docs summary and link for requested function or tag from [cfdocs.org](http://cfdocs.org)
 
+### #cfdocs stats
+
+show the top 10 searched for queries against cfdocs
+
 ### end your message with a space and the word over
 
 KSHHK
