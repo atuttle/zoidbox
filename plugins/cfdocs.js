@@ -114,6 +114,10 @@ module.exports = (function(){
                 return bot.say(channel, hits + '<cf_socialplugin .. /> → returns a bunch of outdated junk that would have been better as a community project dear god what have we done... we should have just given them a package manager like they\'ve been requesting for years ~ http://cfdocs.org/cf_socialplugin');
             }
 
+            if (q === 'cfscriptref') {
+                return bot.say(channel, hits + 'https://github.com/daccfml/cfscript/blob/master/cfscript.md');
+            }
+
             docsApi( q, function(err, result){
                 if (err !== null){
                     bot.say(channel, err );
