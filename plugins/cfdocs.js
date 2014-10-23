@@ -126,9 +126,9 @@ module.exports = (function(){
                     var link = ' ~ http://cfdocs.org/' + q;
                     var msg = '';
                     if (result.type === 'tag'){
-                        msg = result.syntax + ' → ' + result.description.replace(/\s+/g, ' ') + link;
+                        msg = result.syntax + ' → ' + result.description.replace(/\s+/g, ' ');
                     }else{
-                        msg = result.syntax + ' → returns ' + ( result.returns.length ? result.returns : ' nothing' ) + link;
+                        msg = result.syntax + ' → returns ' + ( result.returns.length ? result.returns : ' nothing' );
                     }
 
                     var bufferRemaining = theoreticalMax - ( (conf.get('botName').length + 1) + link.length + hits.length );
