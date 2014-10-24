@@ -166,8 +166,12 @@ module.exports = (function(){
 
 		request(full, function (error, response, body) {
 			if ( !error && response.statusCode === 200 ) {
-				var r = JSON.parse(body);
-				callback(null, r);
+                try {
+                    var r = JSON.parse(body);
+                    callback(null, r);
+                } catch (e) {
+                    callback('Error Parsing JSON for `' + q + '`', null);
+                }
 			} else if ( response.statusCode === 404 ){
 				callback( 'Unable to find docs for `' + q + '`', null );
 			}
