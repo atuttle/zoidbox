@@ -50,7 +50,7 @@ module.exports = (function(){
 			}
 			if ( data === 0 ){ //haven't posted about this one yet, share it
 				if ( !quietly ){
-					bot.say( '#zoidbox', article.title + ' ~ ' + article.link );
+					bot.say( '#zoidbox', article.content + ' ~ ' + article.link );
 				}
 				bot.redis.sadd( 'cfbugs.seen', bugId );
 			}else{
