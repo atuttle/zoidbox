@@ -62,9 +62,13 @@ posts a random zoidism
 
 ### !CFMLfunctionOrTagName
 
-posts docs summary and link for requested function or tag from [cfdocs.org](http://cfdocs.org)
+posts docs summary and link for requested function or tag from [cfdocs.org](http://cfdocs.org).  You can also do !cfscriptref for Adam Cameron's CFScript Reference.
 
-### #cfdocs stats
+### #cfdocs CFMLFunctionOrTagName
+
+shows how many times that query has been searched for.
+
+### #cfdocs !stats
 
 show the top 10 searched for queries against cfdocs
 

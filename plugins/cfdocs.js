@@ -22,9 +22,9 @@ module.exports = (function(){
 				return docs(to, text.slice(1));
 			} else if (text.indexOf('#cfdocs') === 0 && text.split(' ').length > 1) {
                 log('#cfdocs', from, to, text);
-                var parts = text.split(' ');
+                var parts = text.trim().split(' ');
                 switch (parts[1]) {
-                    case 'stats' :
+                    case '!stats' :
                         getTotalHits(to, function(err, data) {
                             if (err) {
                                 log('getTotalHits err', err, data);
@@ -69,6 +69,20 @@ module.exports = (function(){
                             }
                         });
                         break;
+                    default :
+                        getHits(to, parts[1], function(err, data) {
+                            if (err) {
+                                log('getHits err:', err, data);
+                                return;
+                            }
+
+                            if (_.parseInt(data, 10) > 0) {
+                                bot.say(to, parts[1] + ' has been search for ' + data + ' time' + (_.parseInt(data, 10) !== 1 ? 's.' : '.'));
+                            } else {
+                                bot.say(to, parts[1] + ' has never been searched for.');
+                            }
+                        });
+                        break;
                 }
             }
 		});
@@ -104,18 +118,18 @@ module.exports = (function(){
                 return;
             }
 
-            var hits = '(' + data + ' match' + (_.parseInt(data, 10) !== 1 ? 'es' : '') + ') ';
+            //var hits = '(' + data + ' match' + (_.parseInt(data, 10) !== 1 ? 'es' : '') + ') ';
 
             if (q === 'cfclient'){
-                return bot.say(channel, hits + '<cfclient></cfclient> → returns a pink slip, because if you use this shit you should be fired. ~ http://www.codecademy.com/en/tracks/javascript');
+                return bot.say(channel, '<cfclient></cfclient> → returns a pink slip, because if you use this shit you should be fired. ~ http://www.codecademy.com/en/tracks/javascript');
             }
 
             if (q === 'cf_socialplugin'){
-                return bot.say(channel, hits + '<cf_socialplugin .. /> → returns a bunch of outdated junk that would have been better as a community project dear god what have we done... we should have just given them a package manager like they\'ve been requesting for years ~ http://cfdocs.org/cf_socialplugin');
+                return bot.say(channel, '<cf_socialplugin .. /> → returns a bunch of outdated junk that would have been better as a community project dear god what have we done... we should have just given them a package manager like they\'ve been requesting for years ~ http://cfdocs.org/cf_socialplugin');
             }
 
             if (q === 'cfscriptref') {
-                return bot.say(channel, hits + 'https://github.com/daccfml/cfscript/blob/master/cfscript.md');
+                return bot.say(channel, + 'https://github.com/daccfml/cfscript/blob/master/cfscript.md');
             }
 
             docsApi( q, function(err, result){
@@ -131,12 +145,12 @@ module.exports = (function(){
                         msg = result.syntax + ' → returns ' + ( result.returns.length ? result.returns : ' nothing' );
                     }
 
-                    var bufferRemaining = theoreticalMax - ( (conf.get('botName').length + 1) + link.length + hits.length );
+                    var bufferRemaining = theoreticalMax - ( (conf.get('botName').length + 1) + link.length);
                     var fitMsg = msg.substr(0, bufferRemaining);
                     if (fitMsg !== msg){
                         fitMsg = fitMsg + '…';
                     }
-                    fitMsg = hits + fitMsg + link;
+                    fitMsg = fitMsg + link;
                     bot.say( channel, fitMsg );
                 }
             });
