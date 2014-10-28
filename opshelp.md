@@ -48,6 +48,10 @@ resets all statistics for the current room
 
 will show you stats from all of the rooms the bot is currently in - can only be used from #zoidbox
 
+### #cfbugs !init
+
+Only useful to prevent chat flooding if the Redis store has been lost. With an empty Redis store, all bugs appear to be new, so it will notify about each one individually. If you wait until zoidbox joins the channel and then run this command, zoidbox will cache all visible bugId's without sending any messages to chat for any of them.
+
 ### #pounces !clear
 
 clear all pending pounces

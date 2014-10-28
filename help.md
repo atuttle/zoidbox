@@ -72,6 +72,10 @@ shows how many times that query has been searched for.
 
 show the top 10 searched for queries against cfdocs
 
+### #cfbugs !poll
+
+Check for any new bugs in the ColdFusion bugbase (https://bugbase.adobe.com). Zoidbox will check every 15 minutes, but if you can't wait that long you can request an immediate check with this command.
+
 ### end your message with a space and the word over
 
 KSHHK
