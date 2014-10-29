@@ -18,6 +18,14 @@ module.exports = (function(){
 		,'8.0.1': 9290
 		,'8.0.0': 9291
 	};
+	var inversions = {
+		10206: '11.0'
+		,7770: '10.0.0'
+		,9288: '9.0.1'
+		,9289: '9.0.0'
+		,9290: '8.0.1'
+		,9291: '8.0.0'
+	};
 	var bugsUrl = 'https://bugbase.adobe.com/index.cfm?event=qSearchBugs&page=1&pageSize=50&product={PRODUCT}&version={VERSION}&gridsortcolumn=AD_S_DEFECT_ID&gridsortdirection=DESC'.split( '{PRODUCT}' ).join( product );
 	var bugUrl = 'https://bugbase.adobe.com/index.cfm?event=bug&id=';
 
@@ -64,7 +72,7 @@ module.exports = (function(){
 							var title = charmed.toAscii( row[ 4 ] );
 							var link = bugUrl + bugId;
 
-							notify( bugId, title, link, quietly );
+							notify( bugId, title, link, code, quietly );
 
 						});
 
@@ -81,7 +89,7 @@ module.exports = (function(){
 		});
 	}
 
-	function notify( bugId, title, link, quietly ){
+	function notify( bugId, title, link, versionCode, quietly ){
 		quietly = quietly || false;
 		bot.redis.sismember( 'cfbugs.seen', bugId, function( err, data ){
 			if ( err ){
@@ -89,8 +97,8 @@ module.exports = (function(){
 			}
 			if ( data === 0 ){ //haven't posted about this one yet, share it
 				if ( !quietly ){
-					bot.say( '#zoidbox', 'NEW BUG: ' + title + ' ~ ' + link );
-					bot.say( '##coldfusion', 'NEW BUG: ' + title + ' ~ ' + link );
+					bot.say( '#zoidbox', 'NEW BUG (CF' + inversions[versionCode] + '): ' + title + ' ~ ' + link );
+					bot.say( '##coldfusion', 'NEW BUG (CF' + inversions[versionCode] + '): ' + title + ' ~ ' + link );
 				}
 				bot.redis.sadd( 'cfbugs.seen', bugId );
 			}else{
