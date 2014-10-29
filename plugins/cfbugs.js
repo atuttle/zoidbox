@@ -90,7 +90,7 @@ module.exports = (function(){
 			if ( data === 0 ){ //haven't posted about this one yet, share it
 				if ( !quietly ){
 					bot.say( '#zoidbox', 'NEW BUG: ' + title + ' ~ ' + link );
-					bot.say( '##coldfusion', title + ' ~ ' + link );
+					bot.say( '##coldfusion', 'NEW BUG: ' + title + ' ~ ' + link );
 				}
 				bot.redis.sadd( 'cfbugs.seen', bugId );
 			}else{
