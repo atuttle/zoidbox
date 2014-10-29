@@ -44,6 +44,10 @@ the karma giving leaderboard for this channel
 
 the karma given by that `nick`
 
+### ^http://google.com
+
+Will let you know if google.com appears to be up/down to Zoidbox (runs on AWS).
+
 ### #random
 
 pick a random user currently in the chat
