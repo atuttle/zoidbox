@@ -87,3 +87,7 @@ KSHHK
 ### box install {anything}
 
 *giggles*
+
+### #hush [minutes]
+
+Shut zoidbox up for some minutes, default 15. Also available as `zoidbox hush`
