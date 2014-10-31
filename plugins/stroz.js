@@ -3,23 +3,31 @@
 module.exports = (function(){
 
 	var bot,
-        conf;
+        conf,
+        hushed = false;
 
 	return function init (_bot){
 		bot = _bot;
         conf = bot.conf;
 		bot.on( 'message#', function( from, to, text ){
-
-			if ( from.toLowerCase() === bot.conf.get('botName').toLowerCase() ){
+			var me = bot.conf.get('botName').toLowerCase();
+			if ( from.toLowerCase() === me ){
 				return;
 			}
 
-			if (text.indexOf('box install ') === 0) {
-				bot.action(to, 'giggles');
-			} else if (text.slice(-5) === ' over' ){
-				bot.say(to, 'KSHHHK');
-			} else if (text.toLowerCase().indexOf(bot.conf.get('botName').toLowerCase()) !== -1 && from !== conf.get('botName') && from !== 'zoidbox') {
-				bot.say(to, randomZoidism(from));
+			if ( hushed !== false ) {
+				checkHushed();
+			}
+			if (text.indexOf('#hush') === 0 || (text.indexOf(me) === 0) && text.search(/\bhush\b/) > 0) {
+				hush(from, text);
+			} else if (!hushed) {
+				if (text.indexOf('box install ') === 0) {
+					bot.action(to, 'giggles');
+				} else if (text.slice(-5) === ' over' ){
+					bot.say(to, 'KSHHHK');
+				} else if (text.toLowerCase().indexOf(me) !== -1 && from !== me && from !== 'zoidbox') {
+					bot.say(to, randomZoidism(from));
+				}
 			}
 
 		});
@@ -45,6 +53,29 @@ module.exports = (function(){
 		];
 
 		return zoidisms[Math.floor(Math.random() * zoidisms.length)].split('{from}').join(from);
+	}
+
+	function hush( from, text ) {
+		hushed = new Date();
+		var when = 15;
+		var then, hushing;
+		text = text.match(/(?:hush )([0-9]+)$/, '');
+		then = parseInt(text[1], 10);
+		if (then > 0) {
+			when = then;
+		}
+		hushing = new Date( hushed.getTime() + (when * 60000) );
+		if ( hushing > hushed ) {
+			hushed = hushing;
+		}
+		bot.say(from, 'hushed for ' + when + ' minutes, until ' + hushed );
+	}
+
+	function checkHushed() {
+		var now = new Date();
+		if (now > hushed) {
+			hushed = false;
+		}
 	}
 
 })();
