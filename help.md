@@ -70,7 +70,18 @@ posts docs summary and link for requested function or tag from [cfdocs.org](http
 
 ### #cfdocs CFMLFunctionOrTagName
 
-shows how many times that query has been searched for.
+shows how many times that query has been searched for.  You can also search for the following to get links to documentation:
+
+!cfscriptref - Adam Cameron's CFScript Reference
+!taffy
+!fw1
+!di1
+!coldbox
+!testbox
+!wirebox
+!commandbox
+
+If you have other documentation that would be a good fit, open an issue or even better, send a pull request.
 
 ### #cfdocs !stats
 
