@@ -19,7 +19,8 @@ module.exports = (function(){
             commandbox: 'http://www.ortussolutions.com/products/commandbox/docs/current',
             cfclient: '<cfclient></cfclient> → returns a pink slip, because if you use this shit you should be fired. ~ http://www.codecademy.com/en/tracks/javascript',
             cf_socialplugin: '<cf_socialplugin .. /> → returns a bunch of outdated junk that would have been better as a community project dear god what have we done... we should have just given them a package manager like they\'ve been requesting for years ~ http://cfdocs.org/cf_socialplugin',
-            cfscriptref: 'https://github.com/daccfml/cfscript/blob/master/cfscript.md'
+            cfscriptref: 'https://github.com/daccfml/cfscript/blob/master/cfscript.md',
+            cfdownloads: 'http://www.gpickin.com/cfrepo/'
         }; //make sure keys are completely lowercase
 
 	return function init( _bot ){

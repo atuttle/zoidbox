@@ -80,6 +80,7 @@ shows how many times that query has been searched for.  You can also search for 
 - !testbox
 - !wirebox
 - !commandbox
+- !cfdownloads - coldfusion installers
 
 If you have other documentation that would be a good fit, open an issue or even better, send a pull request.
 
