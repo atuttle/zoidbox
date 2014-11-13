@@ -99,7 +99,23 @@ module.exports = (function(){
 			getLeaderboard(to, function(err, data){
 				log('getLeaderboard', err, data);
 
-				var leaders = _.map(_.sortBy(_.map(data, function(item, key) { return [key, item];}), function(value){return _.parseInt(value[1], 10);}).reverse().slice(0, 10), function(item) {return item[0] + ' (' + item[1] + ')';}).join(', ');
+				var leaders = _.map(
+									_.sortBy(
+										_.filter(
+											_.map(data, function(item, key) {
+												return [key, item];
+											})
+										, function(item) {
+											return _.parseInt(item[1], 10) > 0;
+										})
+									, function(value){
+										return _.parseInt(value[1], 10);
+									})
+									.reverse()
+									.slice(0, 10),
+								function(item) {
+									return item[0] + ' (' + item[1] + ')';
+								}).join(', ');
 
 				bot.say(to, 'Current karma leaders are: ' + leaders);
 			});
@@ -140,7 +156,23 @@ module.exports = (function(){
 			getGiverLeaderboard(to, function(err, data){
 				log('getGiverLeaderboard', err, data);
 
-				var leaders = _.map(_.sortBy(_.map(data, function(item, key) { return [key, item];}), function(value){return _.parseInt(value[1], 10);}).reverse().slice(0, 10), function(item) {return item[0] + ' (' + item[1] + ')';}).join(', ');
+				var leaders = _.map(
+									_.sortBy(
+										_.filter(
+											_.map(data, function(item, key) {
+												return [key, item];
+											})
+										, function(item) {
+											return _.parseInt(item[1], 10) > 0;
+										})
+									, function(value){
+										return _.parseInt(value[1], 10);
+									})
+									.reverse()
+									.slice(0, 10),
+								function(item) {
+									return item[0] + ' (' + item[1] + ')';
+								}).join(', ');
 
 				bot.say(to, 'Current karma giving leaders are: ' + leaders);
 			});
@@ -247,7 +279,7 @@ module.exports = (function(){
 		bot.on( 'message#', function (from, to, text){
 			if (text.search(/[:,]\s*\+1/g) !== -1) {
 				emit.emit('addKarmaSucceeding', from, to, text);
-			} else if (text.search(/^\+1[:,]*\s*\w*/g) !== -1) {
+			} else if (text.search(/^\+1[:,\s]*\w/g) !== -1) {
 				emit.emit('addKarmaPreceding', from, to, text);
 			} else if (text.indexOf('#karmagivers') === 0) {
 				emit.emit('karmaGivers', from, to, text);
