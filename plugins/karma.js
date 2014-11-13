@@ -279,7 +279,7 @@ module.exports = (function(){
 		bot.on( 'message#', function (from, to, text){
 			if (text.search(/[:,]\s*\+1/g) !== -1) {
 				emit.emit('addKarmaSucceeding', from, to, text);
-			} else if (text.search(/^\+1[:,\s]*\w/g) !== -1) {
+			} else if (text.search(/^\+1[:,\s]*[\w\[\]]/g) !== -1) {
 				emit.emit('addKarmaPreceding', from, to, text);
 			} else if (text.indexOf('#karmagivers') === 0) {
 				emit.emit('karmaGivers', from, to, text);
