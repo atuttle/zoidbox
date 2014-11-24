@@ -29,25 +29,40 @@ module.exports = (function(){
 		conf = bot.conf;
 		redis = bot.redis;
 
-		bot.on( 'message#', function( from, to, text ){
+		bot.on( 'message', function( from, to, text, message ){
+
+            if (to === bot.botName) {
+				//they are talking to us in a private message, set to to be from
+				to = from;
+			}
+
             var parts = text.trim().split(' ');
 
 			if (text.indexOf('!') === 0){
-				log('cfdocs', from, to, text);
-                if (parts.length > 2 && parts[1] === "!desc") {
-                    bot.ops.isOp(from, function(err, data) {
-                        if (data === 0) {
-                            bot.say(to, 'You must be an op to do that.');
+				log('cfdocs', from, to, text, message.user, message.nick);
+                if (parts.length > 2 && parts[1] === '!desc') {
+                    if (parts[0].slice(1) === from) {
+                        if ('~' + message.nick.toLowerCase() === message.user.toLowerCase()) {
+                            setDesc(parts[0].slice(1), parts.slice(2, parts.length).join(' '));
+                            bot.say(to, 'New description saved for `' + parts[0].slice(1) + '`');
                         } else {
-                            if (parts[2] === '!clear') {
-                                clearDesc(parts[0].slice(1));
-                                bot.say(to, 'Description cleared for `' + parts[0].slice(1) + '`');
-                            } else {
-                                setDesc(parts[0].slice(1), parts.slice(2, parts.length).join(' '));
-                                bot.say(to, 'New description saved for `' + parts[0].slice(1) + '`');
-                            }
+                            bot.say(to, 'You can only set a description for your nick if you are authenticated and are using your username as your nickname');
                         }
-                    });
+                    } else {
+                        bot.ops.isOp(from, function (err, data) {
+                            if (data === 0) {
+                                bot.say(to, 'You must be an op to do that.');
+                            } else {
+                                if (parts[2] === '!clear') {
+                                    clearDesc(parts[0].slice(1));
+                                    bot.say(to, 'Description cleared for `' + parts[0].slice(1) + '`');
+                                } else {
+                                    setDesc(parts[0].slice(1), parts.slice(2, parts.length).join(' '));
+                                    bot.say(to, 'New description saved for `' + parts[0].slice(1) + '`');
+                                }
+                            }
+                        });
+                    }
                 } else {
                     return docs(to, text.slice(1));
                 }
