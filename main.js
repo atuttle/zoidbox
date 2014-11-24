@@ -8,6 +8,7 @@
 		.defaults({
 			'karmaCooldown': 60
 			,'botName': '```zoidbox'
+			,'testingChannel': '#zoidbox'
 		});
 
 	var bot = initIRC( conf );
@@ -31,7 +32,8 @@
 		);
 
 		b.conf = conf;
-        b.botName = conf.get('botName')
+        b.botName = conf.get('botName');
+		b.testingChannel = conf.get('testingChannel');
 
 		b.use = function use( plugin ){
 			plugin( bot );

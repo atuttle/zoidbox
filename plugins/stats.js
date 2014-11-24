@@ -51,7 +51,7 @@ module.exports = (function(){
                         bot.say(to, 'All stats have been reset for: ' + to);
                     }
                 });
-            } else if (nick.toLowerCase().split(' ')[0] === '!all' && to === '#zoidbox') { //todo: need to change this from hard coded
+            } else if (nick.toLowerCase().split(' ')[0] === '!all' && to === bot.testingChannel) {
                 log('!all', to, bot.botName);
                 getChannels(function(err, data){
                     bot.say(to, 'I have data for the following channels: ' + data.join(', '));
@@ -175,6 +175,8 @@ module.exports = (function(){
 		log = bot.log;
 		conf = bot.conf;
 		redis = bot.redis;
+
+		bot.getChannels = getChannels;
 
 		bot.addListener('part', function(channel, nick, reason) {
 			log('part', channel, nick, reason);

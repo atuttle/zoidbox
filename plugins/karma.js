@@ -86,9 +86,9 @@ module.exports = (function(){
                         });
 					}
 				});
-			} else if (nick.toLowerCase().split(' ')[0] === '!all' && to === '#zoidbox') { //todo: need to change this from hard coded
+			} else if (nick.toLowerCase().split(' ')[0] === '!all' && to === bot.testingChannel) {
                 log('#karma !all', to, bot.botName);
-                getChannels(function(err, data){
+                bot.getChannels(function(err, data){
                     bot.say(to, 'I have data for the following channels: ' + data.join(', '));
                     _.each(data, function(channel) {
                         getLeaderboardDisplay(channel, to);
@@ -129,9 +129,9 @@ module.exports = (function(){
 
 					}
 				});
-			} else if (nick.toLowerCase().split(' ')[0] === '!all' && to === '#zoidbox') { //todo: need to change this from hard coded
+			} else if (nick.toLowerCase().split(' ')[0] === '!all' && to === bot.testingChannel) {
                 log('#karmagivers !all', to, bot.botName);
-                getChannels(function(err, data){
+                bot.getChannels(function(err, data){
                     bot.say(to, 'I have data for the following channels: ' + data.join(', '));
                     _.each(data, function(channel) {
                         getGiverLeaderboardDisplay(channel, to);
@@ -150,11 +150,6 @@ module.exports = (function(){
 			getGiverLeaderboardDisplay(to, to);
 		}
 	});
-
-	//todo: I believe this is duplicated, should probably be moved to bot
-	function getChannels (callback) {
-        redis.smembers(bot.botName + '.channels', callback);
-    }
 
 	function incrKarma(channel, nick, giver, incrby) {
 		redis.hincrby(conf.get('botName') + '.' + channel + '.karma', nick.toLowerCase(), incrby);
