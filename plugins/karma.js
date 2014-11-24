@@ -86,6 +86,14 @@ module.exports = (function(){
                         });
 					}
 				});
+			} else if (nick.toLowerCase().split(' ')[0] === '!all' && to === '#zoidbox') { //todo: need to change this from hard coded
+                log('#karma !all', to, bot.botName);
+                getChannels(function(err, data){
+                    bot.say(to, 'I have data for the following channels: ' + data.join(', '));
+                    _.each(data, function(channel) {
+                        getLeaderboardDisplay(channel, to);
+                    });
+                });
 			} else {
 				getKarma(to, nick, function(err, data){
 					if (data !== null && data !== 0) {
@@ -96,29 +104,7 @@ module.exports = (function(){
 				});
 			}
 		} else {
-			getLeaderboard(to, function(err, data){
-				log('getLeaderboard', err, data);
-
-				var leaders = _.map(
-									_.sortBy(
-										_.filter(
-											_.map(data, function(item, key) {
-												return [key, item];
-											})
-										, function(item) {
-											return _.parseInt(item[1], 10) > 0;
-										})
-									, function(value){
-										return _.parseInt(value[1], 10);
-									})
-									.reverse()
-									.slice(0, 10),
-								function(item) {
-									return item[0] + ' (' + item[1] + ')';
-								}).join(', ');
-
-				bot.say(to, 'Current karma leaders are: ' + leaders);
-			});
+			getLeaderboardDisplay(to, to);
 		}
 	});
 
@@ -143,6 +129,14 @@ module.exports = (function(){
 
 					}
 				});
+			} else if (nick.toLowerCase().split(' ')[0] === '!all' && to === '#zoidbox') { //todo: need to change this from hard coded
+                log('#karmagivers !all', to, bot.botName);
+                getChannels(function(err, data){
+                    bot.say(to, 'I have data for the following channels: ' + data.join(', '));
+                    _.each(data, function(channel) {
+                        getGiverLeaderboardDisplay(channel, to);
+                    });
+                });
 			} else {
 				getKarmaGives(to, nick, function(err, data){
 					if (data !== null && data !== 0) {
@@ -153,31 +147,14 @@ module.exports = (function(){
 				});
 			}
 		} else {
-			getGiverLeaderboard(to, function(err, data){
-				log('getGiverLeaderboard', err, data);
-
-				var leaders = _.map(
-									_.sortBy(
-										_.filter(
-											_.map(data, function(item, key) {
-												return [key, item];
-											})
-										, function(item) {
-											return _.parseInt(item[1], 10) > 0;
-										})
-									, function(value){
-										return _.parseInt(value[1], 10);
-									})
-									.reverse()
-									.slice(0, 10),
-								function(item) {
-									return item[0] + ' (' + item[1] + ')';
-								}).join(', ');
-
-				bot.say(to, 'Current karma giving leaders are: ' + leaders);
-			});
+			getGiverLeaderboardDisplay(to, to);
 		}
 	});
+
+	//todo: I believe this is duplicated, should probably be moved to bot
+	function getChannels (callback) {
+        redis.smembers(bot.botName + '.channels', callback);
+    }
 
 	function incrKarma(channel, nick, giver, incrby) {
 		redis.hincrby(conf.get('botName') + '.' + channel + '.karma', nick.toLowerCase(), incrby);
@@ -197,8 +174,60 @@ module.exports = (function(){
 		redis.hgetall(conf.get('botName') + '.' + channel + '.karma', callback);
 	}
 
+	function getLeaderboardDisplay(channel, replyToChannel) {
+		getLeaderboard(channel, function(err, data){
+			log('getLeaderboard', err, data);
+
+			var leaders = _.map(
+								_.sortBy(
+									_.filter(
+										_.map(data, function(item, key) {
+											return [key, item];
+										})
+									, function(item) {
+										return _.parseInt(item[1], 10) > 0;
+									})
+								, function(value){
+									return _.parseInt(value[1], 10);
+								})
+								.reverse()
+								.slice(0, 10),
+							function(item) {
+								return item[0] + ' (' + item[1] + ')';
+							}).join(', ');
+
+			bot.say(replyToChannel, 'Current karma leaders in ' + channel + ' are: ' + leaders);
+		});
+	}
+
 	function getGiverLeaderboard(channel, callback) {
 		redis.hgetall(conf.get('botName') + '.' + channel + '.karma_giver', callback);
+	}
+
+	function getGiverLeaderboardDisplay(channel, replyToChannel) {
+		getGiverLeaderboard(channel, function(err, data){
+			log('getGiverLeaderboard', err, data);
+
+			var leaders = _.map(
+								_.sortBy(
+									_.filter(
+										_.map(data, function(item, key) {
+											return [key, item];
+										})
+									, function(item) {
+										return _.parseInt(item[1], 10) > 0;
+									})
+								, function(value){
+									return _.parseInt(value[1], 10);
+								})
+								.reverse()
+								.slice(0, 10),
+							function(item) {
+								return item[0] + ' (' + item[1] + ')';
+							}).join(', ');
+
+			bot.say(replyToChannel, 'Current karma giving leaders in ' + channel + ' are: ' + leaders);
+		});
 	}
 
 	function resetKarma(channel) {

@@ -32,6 +32,14 @@ restores karma privileges
 
 shows who is banned from karma in the current channel
 
+### #karma !all
+
+will show you the karma leaderboard from all of the rooms the bot is currently in - can only be used from #zoidbox
+
+### #karmagivers !all
+
+will show you the karmagivers leaderboard from all of the rooms the bot is currently in - can only be used from #zoidbox
+
 ### #karmagivers !reset nick
 
 reset a karma giver's stats
