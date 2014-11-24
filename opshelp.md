@@ -59,3 +59,11 @@ clear all pending pounces
 ### #cooldowns !clear
 
 clear all cooldowns
+
+### !{anything} !desc newDescription
+
+Override or set the description for anything.  Does not have to be an actual tag or function
+
+### !{anything} !desc !clear
+
+Clears the custom description
