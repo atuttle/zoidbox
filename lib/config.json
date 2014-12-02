@@ -7,5 +7,5 @@
 	,"redis_auth_pass": ""
 	,"ops": [ "ryanguill", "fusiongrokker" ]
 	,"debug": true
-	,"karmaCooldown": 60
+	,"karmaCooldown": 0
 }

@@ -38,12 +38,12 @@ module.exports = (function(){
 		}
 	});
 
-	emit.on('stats', function(from, to, text){
+	emit.on('stats', function(from, to, text, message){
 		var nick = text.replace('#stats', '').trim();
 
 		if (nick.length) {
             if (nick.toLowerCase().split(' ')[0] === '!reset') {
-                bot.ops.isOp(from, function (err, data) {
+                bot.ops.isOp(message.user, function (err, data) {
                     if (data === 0) {
                         bot.say(to, 'You must be an op to do that.');
                     } else {
@@ -51,7 +51,7 @@ module.exports = (function(){
                         bot.say(to, 'All stats have been reset for: ' + to);
                     }
                 });
-            } else if (nick.toLowerCase().split(' ')[0] === '!all' && to === '#zoidbox') { //todo: need to change this from hard coded
+            } else if (nick.toLowerCase().split(' ')[0] === '!all' && to === bot.testingChannel) {
                 log('!all', to, bot.botName);
                 getChannels(function(err, data){
                     bot.say(to, 'I have data for the following channels: ' + data.join(', '));
@@ -176,6 +176,8 @@ module.exports = (function(){
 		conf = bot.conf;
 		redis = bot.redis;
 
+		bot.getChannels = getChannels;
+
 		bot.addListener('part', function(channel, nick, reason) {
 			log('part', channel, nick, reason);
 			setLastSeen(channel, nick);
@@ -217,6 +219,8 @@ module.exports = (function(){
 		});
 
 		bot.addListener('message', function( from, to, text){
+
+			if (bot.isChannelPaused(to)) return;
 
 			setLastSeen(to, from);
 			countMessage(to, from);

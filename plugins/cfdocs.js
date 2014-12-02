@@ -29,13 +29,47 @@ module.exports = (function(){
 		conf = bot.conf;
 		redis = bot.redis;
 
-		bot.on( 'message#', function( from, to, text ){
-			if (text.indexOf('!') === 0 && text.split(' ').length === 1){
-				log('cfdocs', from, to, text);
-				return docs(to, text.slice(1));
+		bot.on( 'message', function( from, to, text, message ){
+
+            if (bot.isChannelPaused(to)) return;
+
+            if (to === bot.botName) {
+				//they are talking to us in a private message, set to to be from
+				to = from;
+			}
+
+            var parts = text.trim().split(' ');
+
+			if (text.indexOf('!') === 0){
+				log('cfdocs', from, to, text, message.user, message.nick);
+                if (parts.length > 2 && parts[1] === '!desc') {
+                    if (parts[0].slice(1) === from) {
+                        if ('~' + message.nick.toLowerCase().substr(0,9) === message.user.toLowerCase()) {
+                            setDesc(parts[0].slice(1), parts.slice(2, parts.length).join(' '));
+                            bot.say(to, 'New description saved for `' + parts[0].slice(1) + '`');
+                        } else {
+                            bot.say(to, 'You can only set a description for your nick if you are authenticated and are using your username as your nickname.  Username: ' + message.user);
+                        }
+                    } else {
+                        bot.ops.isOp(message.user, function (err, data) {
+                            if (data === 0) {
+                                bot.say(to, 'You must be an op to do that.');
+                            } else {
+                                if (parts[2] === '!clear') {
+                                    clearDesc(parts[0].slice(1));
+                                    bot.say(to, 'Description cleared for `' + parts[0].slice(1) + '`');
+                                } else {
+                                    setDesc(parts[0].slice(1), parts.slice(2, parts.length).join(' '));
+                                    bot.say(to, 'New description saved for `' + parts[0].slice(1) + '`');
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    return docs(to, text.slice(1));
+                }
 			} else if (text.indexOf('#cfdocs') === 0 && text.split(' ').length > 1) {
                 log('#cfdocs', from, to, text);
-                var parts = text.trim().split(' ');
                 switch (parts[1]) {
                     case '!stats' :
                         getTotalHits(to, function(err, data) {
@@ -73,7 +107,7 @@ module.exports = (function(){
 
                         break;
                     case '!reset' :
-                        bot.ops.isOp(from, function(err, data){
+                        bot.ops.isOp(message.user, function(err, data){
                             if (data === 0) {
                                 bot.say(to, 'You must be an op to do that.');
                             } else {
@@ -106,6 +140,18 @@ module.exports = (function(){
 		redis.hincrby(conf.get('botName') + '.' + channel + '.cfdocs_hits', 'TOTAL', 1);
 	}
 
+    function setDesc (q, desc) {
+        redis.hset(conf.get('botName') + '.customDescriptions', q.toLowerCase(), desc);
+    }
+
+    function getDesc (q, callback) {
+        redis.hget(conf.get('botName') + '.customDescriptions', q.toLowerCase(), callback);
+    }
+
+    function clearDesc (q) {
+        redis.hdel(conf.get('botName') + '.customDescriptions', q.toLowerCase());
+    }
+
     function getHits (channel, q, callback) {
         redis.hget(conf.get('botName') + '.' + channel + '.cfdocs_hits', q.toLowerCase(), callback);
     }
@@ -135,28 +181,37 @@ module.exports = (function(){
                 return bot.say(channel, queryExceptions[q]);
             }
 
-            docsApi( q, function(err, result){
-                if (err !== null){
-                    bot.say(channel, err );
-                }else{
-                    var theoreticalMax = 400; //rough guess at how many characters we get
-                    var link = ' ~ http://cfdocs.org/' + q;
-                    var msg = '';
-                    if (result.type === 'tag'){
-                        msg = result.syntax + ' → ' + result.description.replace(/\s+/g, ' ');
-                    }else{
-                        msg = result.syntax + ' → returns ' + ( result.returns.length ? result.returns : ' nothing' );
-                    }
+            getDesc(q, function(err, result) {
 
-                    var bufferRemaining = theoreticalMax - ( (conf.get('botName').length + 1) + link.length);
-                    var fitMsg = msg.substr(0, bufferRemaining);
-                    if (fitMsg !== msg){
-                        fitMsg = fitMsg + '…';
-                    }
-                    fitMsg = fitMsg + link;
-                    bot.say( channel, fitMsg );
+                if (result !== null) {
+                    bot.say(channel, result);
+                } else {
+                    docsApi( q, function(err, result){
+                        if (err !== null){
+                            bot.say(channel, err );
+                        } else {
+                            var theoreticalMax = 400; //rough guess at how many characters we get
+                            var link = ' ~ http://cfdocs.org/' + q;
+                            var msg = '';
+                            if (result.type === 'tag'){
+                                msg = result.syntax + ' → ' + result.description.replace(/\s+/g, ' ');
+                            }else{
+                                msg = result.syntax + ' → returns ' + ( result.returns.length ? result.returns : ' nothing' );
+                            }
+
+                            var bufferRemaining = theoreticalMax - ( (conf.get('botName').length + 1) + link.length);
+                            var fitMsg = msg.substr(0, bufferRemaining);
+                            if (fitMsg !== msg){
+                                fitMsg = fitMsg + '…';
+                            }
+                            fitMsg = fitMsg + link;
+                            bot.say( channel, fitMsg );
+                        }
+                    });
                 }
             });
+
+
         });
 
 

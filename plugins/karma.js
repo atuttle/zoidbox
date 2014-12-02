@@ -22,12 +22,12 @@ module.exports = (function(){
 		addKarma(nick[0], from, to, text);
 	});
 
-	emit.on('karma', function(from, to, text){
+	emit.on('karma', function(from, to, text, message){
 		var nick = text.replace('#karma', '').trim();
 
 		if (nick.length) {
 			if (nick.toLowerCase().split(' ')[0] === '!reset') {
-				bot.ops.isOp(from, function (err, data) {
+				bot.ops.isOp(message.user, function (err, data) {
 					if (data === 0) {
 						bot.say(to, 'You must be an op to do that.');
 					} else {
@@ -44,7 +44,7 @@ module.exports = (function(){
 					}
 				});
 			} else if (nick.toLowerCase().split(' ')[0] === '!ban') {
-				bot.ops.isOp(from, function (err, data) {
+				bot.ops.isOp(message.user, function (err, data) {
 					if (data === 0) {
 						bot.say(to, 'You must be an op to do that.');
 					} else {
@@ -61,7 +61,7 @@ module.exports = (function(){
 					}
 				});
             } else if (nick.toLowerCase().split(' ')[0] === '!unban') {
-				bot.ops.isOp(from, function (err, data) {
+				bot.ops.isOp(message.user, function (err, data) {
 					if (data === 0) {
 						bot.say(to, 'You must be an op to do that.');
 					} else {
@@ -77,7 +77,7 @@ module.exports = (function(){
 					}
 				});
             } else if (nick.toLowerCase().split(' ')[0] === '!bans') {
-				bot.ops.isOp(from, function (err, data) {
+				bot.ops.isOp(message.user, function (err, data) {
 					if (data === 0) {
 						bot.say(to, 'You must be an op to do that.');
 					} else {
@@ -86,6 +86,14 @@ module.exports = (function(){
                         });
 					}
 				});
+			} else if (nick.toLowerCase().split(' ')[0] === '!all' && to === bot.testingChannel) {
+                log('#karma !all', to, bot.botName);
+                bot.getChannels(function(err, data){
+                    bot.say(to, 'I have data for the following channels: ' + data.join(', '));
+                    _.each(data, function(channel) {
+                        getLeaderboardDisplay(channel, to);
+                    });
+                });
 			} else {
 				getKarma(to, nick, function(err, data){
 					if (data !== null && data !== 0) {
@@ -96,22 +104,16 @@ module.exports = (function(){
 				});
 			}
 		} else {
-			getLeaderboard(to, function(err, data){
-				log('getLeaderboard', err, data);
-
-				var leaders = _.map(_.sortBy(_.map(data, function(item, key) { return [key, item];}), function(value){return _.parseInt(value[1], 10);}).reverse().slice(0, 10), function(item) {return item[0] + ' (' + item[1] + ')';}).join(', ');
-
-				bot.say(to, 'Current karma leaders are: ' + leaders);
-			});
+			getLeaderboardDisplay(to, to);
 		}
 	});
 
-	emit.on('karmaGivers', function(from, to, text){
+	emit.on('karmaGivers', function(from, to, text, message){
 		var nick = text.replace('#karmagivers', '').trim();
 
 		if (nick.length) {
 			if (nick.toLowerCase().split(' ')[0] === '!reset') {
-				bot.ops.isOp(from, function(err, data){
+				bot.ops.isOp(message.user, function(err, data){
 					if (data === 0) {
 						bot.say(to, 'You must be an op to do that.');
 					} else {
@@ -127,6 +129,14 @@ module.exports = (function(){
 
 					}
 				});
+			} else if (nick.toLowerCase().split(' ')[0] === '!all' && to === bot.testingChannel) {
+                log('#karmagivers !all', to, bot.botName);
+                bot.getChannels(function(err, data){
+                    bot.say(to, 'I have data for the following channels: ' + data.join(', '));
+                    _.each(data, function(channel) {
+                        getGiverLeaderboardDisplay(channel, to);
+                    });
+                });
 			} else {
 				getKarmaGives(to, nick, function(err, data){
 					if (data !== null && data !== 0) {
@@ -137,13 +147,7 @@ module.exports = (function(){
 				});
 			}
 		} else {
-			getGiverLeaderboard(to, function(err, data){
-				log('getGiverLeaderboard', err, data);
-
-				var leaders = _.map(_.sortBy(_.map(data, function(item, key) { return [key, item];}), function(value){return _.parseInt(value[1], 10);}).reverse().slice(0, 10), function(item) {return item[0] + ' (' + item[1] + ')';}).join(', ');
-
-				bot.say(to, 'Current karma giving leaders are: ' + leaders);
-			});
+			getGiverLeaderboardDisplay(to, to);
 		}
 	});
 
@@ -165,8 +169,60 @@ module.exports = (function(){
 		redis.hgetall(conf.get('botName') + '.' + channel + '.karma', callback);
 	}
 
+	function getLeaderboardDisplay(channel, replyToChannel) {
+		getLeaderboard(channel, function(err, data){
+			log('getLeaderboard', err, data);
+
+			var leaders = _.map(
+								_.sortBy(
+									_.filter(
+										_.map(data, function(item, key) {
+											return [key, item];
+										})
+									, function(item) {
+										return _.parseInt(item[1], 10) > 0;
+									})
+								, function(value){
+									return _.parseInt(value[1], 10);
+								})
+								.reverse()
+								.slice(0, 10),
+							function(item) {
+								return item[0] + ' (' + item[1] + ')';
+							}).join(', ');
+
+			bot.say(replyToChannel, 'Current karma leaders in ' + channel + ' are: ' + leaders);
+		});
+	}
+
 	function getGiverLeaderboard(channel, callback) {
 		redis.hgetall(conf.get('botName') + '.' + channel + '.karma_giver', callback);
+	}
+
+	function getGiverLeaderboardDisplay(channel, replyToChannel) {
+		getGiverLeaderboard(channel, function(err, data){
+			log('getGiverLeaderboard', err, data);
+
+			var leaders = _.map(
+								_.sortBy(
+									_.filter(
+										_.map(data, function(item, key) {
+											return [key, item];
+										})
+									, function(item) {
+										return _.parseInt(item[1], 10) > 0;
+									})
+								, function(value){
+									return _.parseInt(value[1], 10);
+								})
+								.reverse()
+								.slice(0, 10),
+							function(item) {
+								return item[0] + ' (' + item[1] + ')';
+							}).join(', ');
+
+			bot.say(replyToChannel, 'Current karma giving leaders in ' + channel + ' are: ' + leaders);
+		});
 	}
 
 	function resetKarma(channel) {
@@ -244,15 +300,18 @@ module.exports = (function(){
 		redis = bot.redis;
 
 
-		bot.on( 'message#', function (from, to, text){
+		bot.on( 'message#', function (from, to, text, message){
+
+			if (bot.isChannelPaused(to)) return;
+
 			if (text.search(/[:,]\s*\+1/g) !== -1) {
 				emit.emit('addKarmaSucceeding', from, to, text);
-			} else if (text.search(/^\+1[:,]*\s*\w*/g) !== -1) {
+			} else if (text.search(/^\+1[:,\s]*[\w\[\]]/g) !== -1) {
 				emit.emit('addKarmaPreceding', from, to, text);
 			} else if (text.indexOf('#karmagivers') === 0) {
-				emit.emit('karmaGivers', from, to, text);
+				emit.emit('karmaGivers', from, to, text, message);
 			} else if (text.indexOf('#karma') === 0) {
-				emit.emit('karma', from, to, text);
+				emit.emit('karma', from, to, text, message);
 			}
 		});
 	};

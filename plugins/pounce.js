@@ -8,11 +8,14 @@ module.exports = (function(){
 	return function init( _bot ){
 		bot = _bot;
 
-		bot.on( 'message#', function( from, to, text ){
+		bot.on( 'message#', function( from, to, text, message ){
+
+			if (bot.isChannelPaused(to)) return;
+
 			if (text.indexOf('#pounces') === 0){
 
 				if (text.replace('#pounces', '').trim() === '!clear'){
-					bot.ops.isOp( from, function(err, isOp){
+					bot.ops.isOp( message.user, function(err, isOp){
 						if (isOp === 0){
 							bot.say( to, 'You must be an op to clear pounces' );
 						}else{

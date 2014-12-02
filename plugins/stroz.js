@@ -10,6 +10,9 @@ module.exports = (function(){
 		bot = _bot;
         conf = bot.conf;
 		bot.on( 'message#', function( from, to, text ){
+
+			if (bot.isChannelPaused(to)) return;
+
 			var me = bot.conf.get('botName').toLowerCase();
 			if ( from.toLowerCase() === me ){
 				return;
@@ -58,9 +61,12 @@ module.exports = (function(){
 	function hush( from, text ) {
 		hushed = new Date();
 		var when = 15;
-		var then, hushing;
+		var then = 0,
+			hushing;
 		text = text.match(/(?:hush )([0-9]+)$/, '');
-		then = parseInt(text[1], 10);
+		if (text) {
+			then = parseInt(text[1], 10);
+		}
 		if (then > 0) {
 			when = then;
 		}
