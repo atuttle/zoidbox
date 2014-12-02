@@ -78,8 +78,8 @@ Clears the custom description
 
 ### #pause botname
 
-Will block all input and output from the bot until an #unpause is issued by an op
+Will block all input and output in the current room from the bot until an #unpause is issued by an op
 
-### #unpause botname
+### #unpause botname or #play botname
 
-Will resume bot activities.
+Will resume bot activities in the current room

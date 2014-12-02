@@ -302,7 +302,7 @@ module.exports = (function(){
 
 		bot.on( 'message#', function (from, to, text, message){
 
-			if (bot.isBlocked) return;
+			if (bot.isChannelPaused(to)) return;
 
 			if (text.search(/[:,]\s*\+1/g) !== -1) {
 				emit.emit('addKarmaSucceeding', from, to, text);

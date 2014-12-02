@@ -11,7 +11,7 @@ module.exports = (function(){
         conf = bot.conf;
 		bot.on( 'message#', function( from, to, text ){
 
-			if (bot.isBlocked) return;
+			if (bot.isChannelPaused(to)) return;
 
 			var me = bot.conf.get('botName').toLowerCase();
 			if ( from.toLowerCase() === me ){

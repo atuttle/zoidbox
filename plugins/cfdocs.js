@@ -31,7 +31,7 @@ module.exports = (function(){
 
 		bot.on( 'message', function( from, to, text, message ){
 
-            if (bot.isBlocked) return;
+            if (bot.isChannelPaused(to)) return;
 
             if (to === bot.botName) {
 				//they are talking to us in a private message, set to to be from

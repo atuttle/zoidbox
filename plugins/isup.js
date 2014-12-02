@@ -9,7 +9,7 @@ module.exports = (function(){
 		_bot = bot;
 		bot.on( 'message#', function( from, to, text ){
 
-			if (bot.isBlocked) return;
+			if (bot.isChannelPaused(to)) return;
 
 			if (text.indexOf('^') === 0 && text.length >= 4 && text.split(' ').length === 1) {
 				var url = text.split('');
