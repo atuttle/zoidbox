@@ -4,6 +4,9 @@ module.exports = (function(){
 
 	return function init( bot ){
 		bot.on( 'message#', function( from, to, text ){
+
+			if (bot.isBlocked) return;
+
 			if (text.indexOf('gif:') === 0 && text.length >= 5) {
 				gifme(text.substr(4), function(err, url){
 					if (err){

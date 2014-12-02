@@ -220,6 +220,8 @@ module.exports = (function(){
 
 		bot.addListener('message', function( from, to, text){
 
+			if (bot.isBlocked) return;
+
 			setLastSeen(to, from);
 			countMessage(to, from);
 

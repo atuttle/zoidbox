@@ -10,6 +10,9 @@ module.exports = (function(){
 		bot = _bot;
         conf = bot.conf;
 		bot.on( 'message#', function( from, to, text ){
+
+			if (bot.isBlocked) return;
+
 			var me = bot.conf.get('botName').toLowerCase();
 			if ( from.toLowerCase() === me ){
 				return;

@@ -75,3 +75,11 @@ Override or set the description for anything.  Does not have to be an actual tag
 ### !{anything} !desc !clear
 
 Clears the custom description
+
+### #pause botname
+
+Will block all input and output from the bot until an #unpause is issued by an op
+
+### #unpause botname
+
+Will resume bot activities.

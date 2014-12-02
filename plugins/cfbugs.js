@@ -33,6 +33,9 @@ module.exports = (function(){
 		bot = _bot;
 
 		bot.on( 'message#', function( from, to, text, message){
+
+			if (bot.isBlocked) return;
+
 			if ( text === '#cfbugs !poll' ){
 				checkForBugs();
 			}else if ( text === '#cfbugs !init' ){

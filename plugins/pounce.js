@@ -9,6 +9,9 @@ module.exports = (function(){
 		bot = _bot;
 
 		bot.on( 'message#', function( from, to, text, message ){
+
+			if (bot.isBlocked) return;
+
 			if (text.indexOf('#pounces') === 0){
 
 				if (text.replace('#pounces', '').trim() === '!clear'){

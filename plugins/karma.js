@@ -301,6 +301,9 @@ module.exports = (function(){
 
 
 		bot.on( 'message#', function (from, to, text, message){
+
+			if (bot.isBlocked) return;
+
 			if (text.search(/[:,]\s*\+1/g) !== -1) {
 				emit.emit('addKarmaSucceeding', from, to, text);
 			} else if (text.search(/^\+1[:,\s]*[\w\[\]]/g) !== -1) {
