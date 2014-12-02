@@ -4,7 +4,7 @@
 	var conf = require('nconf')
 		.argv()
 		.env()
-		.file({file: './lib/config.json'})
+		.file({file: getConfigFile()})
 		.defaults({
 			'karmaCooldown': 60
 			,'botName': '```zoidbox'
@@ -18,6 +18,12 @@
 	bot.loadPlugins();
 
 	//=====================================================
+
+	function getConfigFile(){
+		var override = './lib/config.user.json'
+			,def = './lib/config.json';
+		return require('fs').existsSync(override) ? override : def;
+	}
 
 	function initIRC( conf ){
 		var irc = require( 'irc' );
