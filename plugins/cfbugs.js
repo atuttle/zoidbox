@@ -32,11 +32,11 @@ module.exports = (function(){
 	return function init( _bot ){
 		bot = _bot;
 
-		bot.on( 'message#', function( from, to, text ){
+		bot.on( 'message#', function( from, to, text, message){
 			if ( text === '#cfbugs !poll' ){
 				checkForBugs();
 			}else if ( text === '#cfbugs !init' ){
-				bot.ops.isOp( from, function( err, data ){
+				bot.ops.isOp( message.user, function( err, data ){
 					if ( err ){
 						return bot.say( to, 'Error determinging your OPS status. Oops.');
 					}

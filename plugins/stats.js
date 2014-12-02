@@ -38,12 +38,12 @@ module.exports = (function(){
 		}
 	});
 
-	emit.on('stats', function(from, to, text){
+	emit.on('stats', function(from, to, text, message){
 		var nick = text.replace('#stats', '').trim();
 
 		if (nick.length) {
             if (nick.toLowerCase().split(' ')[0] === '!reset') {
-                bot.ops.isOp(from, function (err, data) {
+                bot.ops.isOp(message.user, function (err, data) {
                     if (data === 0) {
                         bot.say(to, 'You must be an op to do that.');
                     } else {

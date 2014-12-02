@@ -49,7 +49,7 @@ module.exports = (function(){
                             bot.say(to, 'You can only set a description for your nick if you are authenticated and are using your username as your nickname');
                         }
                     } else {
-                        bot.ops.isOp(from, function (err, data) {
+                        bot.ops.isOp(message.user, function (err, data) {
                             if (data === 0) {
                                 bot.say(to, 'You must be an op to do that.');
                             } else {
@@ -105,7 +105,7 @@ module.exports = (function(){
 
                         break;
                     case '!reset' :
-                        bot.ops.isOp(from, function(err, data){
+                        bot.ops.isOp(message.user, function(err, data){
                             if (data === 0) {
                                 bot.say(to, 'You must be an op to do that.');
                             } else {

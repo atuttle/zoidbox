@@ -22,12 +22,12 @@ module.exports = (function(){
 		addKarma(nick[0], from, to, text);
 	});
 
-	emit.on('karma', function(from, to, text){
+	emit.on('karma', function(from, to, text, message){
 		var nick = text.replace('#karma', '').trim();
 
 		if (nick.length) {
 			if (nick.toLowerCase().split(' ')[0] === '!reset') {
-				bot.ops.isOp(from, function (err, data) {
+				bot.ops.isOp(message.user, function (err, data) {
 					if (data === 0) {
 						bot.say(to, 'You must be an op to do that.');
 					} else {
@@ -44,7 +44,7 @@ module.exports = (function(){
 					}
 				});
 			} else if (nick.toLowerCase().split(' ')[0] === '!ban') {
-				bot.ops.isOp(from, function (err, data) {
+				bot.ops.isOp(message.user, function (err, data) {
 					if (data === 0) {
 						bot.say(to, 'You must be an op to do that.');
 					} else {
@@ -61,7 +61,7 @@ module.exports = (function(){
 					}
 				});
             } else if (nick.toLowerCase().split(' ')[0] === '!unban') {
-				bot.ops.isOp(from, function (err, data) {
+				bot.ops.isOp(message.user, function (err, data) {
 					if (data === 0) {
 						bot.say(to, 'You must be an op to do that.');
 					} else {
@@ -77,7 +77,7 @@ module.exports = (function(){
 					}
 				});
             } else if (nick.toLowerCase().split(' ')[0] === '!bans') {
-				bot.ops.isOp(from, function (err, data) {
+				bot.ops.isOp(message.user, function (err, data) {
 					if (data === 0) {
 						bot.say(to, 'You must be an op to do that.');
 					} else {
@@ -108,12 +108,12 @@ module.exports = (function(){
 		}
 	});
 
-	emit.on('karmaGivers', function(from, to, text){
+	emit.on('karmaGivers', function(from, to, text, message){
 		var nick = text.replace('#karmagivers', '').trim();
 
 		if (nick.length) {
 			if (nick.toLowerCase().split(' ')[0] === '!reset') {
-				bot.ops.isOp(from, function(err, data){
+				bot.ops.isOp(message.user, function(err, data){
 					if (data === 0) {
 						bot.say(to, 'You must be an op to do that.');
 					} else {
@@ -300,15 +300,15 @@ module.exports = (function(){
 		redis = bot.redis;
 
 
-		bot.on( 'message#', function (from, to, text){
+		bot.on( 'message#', function (from, to, text, message){
 			if (text.search(/[:,]\s*\+1/g) !== -1) {
 				emit.emit('addKarmaSucceeding', from, to, text);
 			} else if (text.search(/^\+1[:,\s]*[\w\[\]]/g) !== -1) {
 				emit.emit('addKarmaPreceding', from, to, text);
 			} else if (text.indexOf('#karmagivers') === 0) {
-				emit.emit('karmaGivers', from, to, text);
+				emit.emit('karmaGivers', from, to, text, message);
 			} else if (text.indexOf('#karma') === 0) {
-				emit.emit('karma', from, to, text);
+				emit.emit('karma', from, to, text, message);
 			}
 		});
 	};
