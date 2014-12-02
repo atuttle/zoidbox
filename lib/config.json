@@ -1,12 +1,11 @@
 {
-	 "channels": [ "#zoidbox" ]
-	,"testingChannel": "#zoidbox"
+	 "channels": [ "##coldfusion", "#zoidbox" ]
 	,"server": "irc.freenode.net"
-	,"botName": "guillbox"
+	,"botName": "zoidbox"
 	,"redis_port": 6379
-	,"redis_host": "localhost"
+	,"redis_host": ""
 	,"redis_auth_pass": ""
-	,"ops": [ "ryanguill", "fusiongrokker"]
+	,"ops": [ "ryanguill", "fusiongrokker" ]
 	,"debug": true
-	,"karmaCooldown": 60
+	,"karmaCooldown": 0
 }
