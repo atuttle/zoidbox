@@ -32,9 +32,14 @@ module.exports = (function(){
 	return function init( _bot ){
 		bot = _bot;
 
-		bot.on( 'message#', function( from, to, text, message){
+		bot.on( 'message', function( from, to, text, message){
 
 			if (bot.isChannelPaused(to)) return;
+
+			if (to === bot.botName) {
+			    //they are talking to us in a private message, set to to be from
+			    to = from;
+			}
 
 			if ( text === '#cfbugs !poll' ){
 				checkForBugs();
