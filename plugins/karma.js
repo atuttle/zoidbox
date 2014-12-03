@@ -4,6 +4,7 @@
 var _ = require('lodash');
 var events = require('events');
 var emit = new events.EventEmitter();
+//var R = require('ramda');
 
 module.exports = (function(){
 
@@ -277,18 +278,38 @@ module.exports = (function(){
                         bot.say(to, nick + ' is banned from receiving karma in ' + to);
                     } else {
                         getLastKarmaGive(to, from, function (err, data) {
-                            //log(Date.now() - data, conf.get('karmaCooldown'));
                             if (Date.now() - data > conf.get('karmaCooldown') * 1000) {
                                 incrKarma(to, nick, from, 1);
-                                bot.say(to, from + ' gives karma to ' + nick);
+	                            getLeaderboard(to, function(err, data){
+
+									var leaders = _.map(
+													_.sortBy(
+														_.filter(
+															_.map(data, function(item, key) {
+																return [key, item];
+															})
+														, function(item) {
+															return _.parseInt(item[1], 10) > 0;
+														})
+													, function(value){
+														return _.parseInt(value[1], 10);
+													})
+													.reverse()
+												, function (item, index) {
+													return [item[0], item[1], index + 1];
+												});
+
+		                            var place = _.first(_.filter(leaders, function(item) {return item[0] === nick;}));
+
+									bot.say(to, from + ' gives karma to ' + nick + '. They now have ' + place[1] + ' karma, #' + place[2] + ' in ' + to);
+								});
+
                             } else {
                                 bot.say(to, 'easy ' + from + '.');
                             }
                         });
                     }
                 });
-
-
 			}
 		}
 	}
