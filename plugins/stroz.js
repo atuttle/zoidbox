@@ -53,6 +53,7 @@ module.exports = (function(){
 			,'the giants'
 			,'occupy me {from}'
 			,'this is some podman-level nonsense'
+			,'like I said, you were doing it wrong'
 		];
 
 		return zoidisms[Math.floor(Math.random() * zoidisms.length)].split('{from}').join(from);
