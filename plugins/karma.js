@@ -187,12 +187,13 @@ module.exports = (function(){
 									return _.parseInt(value[1], 10);
 								})
 								.reverse()
-								.slice(0, 10),
-							function(item) {
-								return item[0] + ' (' + item[1] + ')';
-							}).join(', ');
+							, function (item, index) {
+								return [item[0], item[1], index + 1];
+							});
 
-			bot.say(replyToChannel, 'Current karma leaders in ' + channel + ' are: ' + leaders);
+			var list = _.map(leaders.slice(0, 10), function(item) { return item[0] + ' (' + item[1] + ')'; }).join(', ');
+
+			bot.say(replyToChannel, 'Current karma leaders in ' + channel + ' are: ' + list + ' ~ ' + leaders.length + ' total karma holder' + (leaders.length !== 1 ? 's.' : '.') );
 		});
 	}
 
@@ -217,12 +218,13 @@ module.exports = (function(){
 									return _.parseInt(value[1], 10);
 								})
 								.reverse()
-								.slice(0, 10),
-							function(item) {
-								return item[0] + ' (' + item[1] + ')';
-							}).join(', ');
+							, function (item, index) {
+								return [item[0], item[1], index + 1];
+							});
 
-			bot.say(replyToChannel, 'Current karma giving leaders in ' + channel + ' are: ' + leaders);
+			var list = _.map(leaders.slice(0, 10), function(item) { return item[0] + ' (' + item[1] + ')'; }).join(', ');
+
+			bot.say(replyToChannel, 'Current karma giving leaders in ' + channel + ' are: ' + list + ' ~ ' + leaders.length + ' total karma giver' + (leaders.length !== 1 ? 's.' : '.'));
 		});
 	}
 
