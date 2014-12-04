@@ -99,7 +99,7 @@ module.exports = (function(){
 							console.log(pounces[p]);
 							var data = JSON.parse( pounces[p] );
 							console.log(data);
-							bot.say( chan, nick + ': ' + data.from + ' wanted me to tell you, "' + data.msg + '"');
+							bot.say( chan, nick + ': ' + data.from + ' wanted me to tell you, `' + data.msg + '`');
 						}
 						bot.redis.del( chan + '.pounce.' + nick );
 						bot.redis.srem( chan + '.pouncees', nick );
