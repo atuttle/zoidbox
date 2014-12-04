@@ -299,7 +299,12 @@ module.exports = (function(){
 													return [item[0], item[1], index + 1];
 												});
 
-		                            var place = _.first(_.filter(leaders, function(item) {return item[0] === nick;}));
+		                            var place = _.first(_.filter(leaders, function(item) {return item[0] === nick.toLowerCase();}));
+
+		                            if (_.isUndefined(place)) {
+			                            log('addKarma: place undefined', place, leaders, nick);
+			                            place = [nick, 0, 0];
+		                            }
 
 									bot.say(to, from + ' gives karma to ' + nick + '. They now have ' + place[1] + ' karma, #' + place[2] + ' in ' + to);
 								});
