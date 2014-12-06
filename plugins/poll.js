@@ -4,6 +4,7 @@
 var _ = require('lodash');
 var events = require('events');
 var emit = new events.EventEmitter();
+var moment = require('moment');
 
 module.exports = (function() {
 
@@ -14,7 +15,10 @@ module.exports = (function() {
 
 	var defaultState = {
 		isPollOpen: false,
+		pollOpenTime: 0,
+		pollOpenDuration: 0,
 		allowMultipleVotes: false,
+		pmOnly: false,
 		question: '',
 		answers: [],
 		votes: []
@@ -22,7 +26,7 @@ module.exports = (function() {
 	state = {};
 
 	function letterForIndex (index) {
-		return String.fromCharCode(65+index);
+		return String.fromCharCode(65 + index);
 	}
 
 	function indexForLetter (letter) {
@@ -57,8 +61,6 @@ module.exports = (function() {
 			return acc;
 		}, 'A');
 
-
-
 		return {letter: maxVotesLetter, answer: state.answers[indexForLetter(maxVotesLetter)].value, votes: talliedVotes[maxVotesLetter] || 0, talliedVotes: talliedVotes};
 
 	}
@@ -70,11 +72,38 @@ module.exports = (function() {
 			return winner.talliedVotes[letter] || 0;
 		}
 
-		var out = 'The winner is ' + winner.letter + ': `' + winner.answer + '` with ' + winner.votes + ' vote' + (winner.votes !== 1 ? 's' : '') + '!\n';
+		//todo: handle ties
+		//todo: handle no votes
+
+		var out = '';
+
+		if (state.isPollOpen) {
+			out += 'The current leader is ';
+		} else {
+			out += 'The winner is ';
+		}
+
+		out += winner.letter + ': `' + winner.answer + '` with ' + winner.votes + ' vote' + (winner.votes !== 1 ? 's' : '') + '! ';
+
+		if (state.isPollOpen) {
+			out += 'Poll has been open for ';
+		} else {
+			out += 'Poll was open for ';
+		}
+
+		out += getPollOpenDuration() + '\n';
 
 		return out + 'Question: `' + state.question + '` Options: ' + _.reduce(state.answers, function(acc, item) {
 			return acc += item.letter + ': `' + item.value + '` (' + getVotesForLetter(item.letter) + ' vote' + (getVotesForLetter(item.letter) !== 1 ? 's' : '') + ') ';
 		}, '');
+	}
+
+	function getVoteInstructions () {
+		if (state.pmOnly) {
+			return 'Use /msg ' + bot.botName + ' #poll {answer letter}';
+		} else {
+			return 'Use #poll {answer letter} ~ You can also vote through PM.';
+		}
 	}
 
 	function getVoterCount () {
@@ -82,7 +111,8 @@ module.exports = (function() {
 	}
 
 	function getPollStatus () {
-		return (state.isPollOpen ? 'Poll Open! ' : 'Poll Closed. ') + (isValidQuestion() ? getQuestionDisplay() + getVoterCount() : '');
+		var out = (state.isPollOpen ? 'Poll Open! ' : 'Poll Closed. ') + (isValidQuestion() ? getQuestionDisplay() + getVoterCount() : '') + ' ';
+		return out += (state.isPollOpen ? getVoteInstructions() : ' ');
 	}
 
 	function parseCommand (args) {
@@ -157,7 +187,31 @@ module.exports = (function() {
 		});
 	}
 
+	function openPoll () {
+		state.isPollOpen = true;
+		state.pollOpenTime = new Date().getTime();
+		state.pollOpenDuration = 0;
+	}
+
+	function closePoll () {
+		state.isPollOpen = false;
+		state.pollOpenDuration += new Date().getTime() - state.pollOpenTime;
+		state.pollOpenTime = 0;
+	}
+
+	function getPollOpenDuration () {
+		var duration = state.pollOpenDuration;
+		if (state.isPollOpen) {
+			duration += new Date().getTime() - state.pollOpenTime;
+		}
+		return moment.duration(duration).humanize();
+	}
+
 	emit.on('pollCreate', function(from, to, text, message, isPrivateMessage) {
+
+		if (isValidQuestion()) {
+			return bot.say(to, 'There is already a poll created ~ use #poll -reset to clear current poll first.');
+		}
 
 		/*
 		* expect:
@@ -171,8 +225,7 @@ module.exports = (function() {
 		var command = parseCommand(text.trim().split(' '));
 
 		function returnParseError() {
-			bot.say(to, 'Invalid command. Please use the format: #poll -create {question} -options ["option A", "option B"] - please use double quotes');
-			return;
+			return bot.say(to, 'Invalid command. Please use the format: #poll -create {question} -options ["option A", "option B"] - please use double quotes');
 		}
 
 		if (command[0] !== '#poll') {
@@ -192,12 +245,17 @@ module.exports = (function() {
 		state.question = command[2];
 		state.answers = _.map(command[4], function(item, index) { return {index: index, letter:letterForIndex(index), value: item};});
 
-		if (_.any(command, function(item) {return item.toLowerCase() === '-allowmultiplevotes';})) {
+		if (_.any(command, function(item) {return _.isString(item) && item.toLowerCase() === '-allowmultiplevotes';})) {
 			state.allowMultipleVotes = true;
 		}
 
+		if (_.any(command, function(item) {return _.isString(item) && item.toLowerCase() === '-pmonly';})) {
+			state.pmOnly = true;
+		}
+
 		if (_.any(command, function(item) {return item === '-open';})) {
-			state.isPollOpen = true;
+			openPoll();
+
 			return bot.say(to, getPollStatus());
 		} else {
 			return bot.say(to, 'Poll created; Use #poll -open to start!');
@@ -210,7 +268,7 @@ module.exports = (function() {
 			return bot.say(to, 'Not ready to open.  Use #poll -create to set the question up first.  See #help for more info.');
 		}
 
-		state.isPollOpen = true;
+		openPoll();
 
 		bot.say(to, getPollStatus());
 	});
@@ -224,7 +282,7 @@ module.exports = (function() {
 			return bot.say(to, 'Poll isn`t open...');
 		}
 
-		state.isPollOpen = false;
+		closePoll();
 		bot.say(to, getResultsDisplay());
 	});
 
@@ -247,21 +305,27 @@ module.exports = (function() {
 	});
 
 	emit.on('pollVote', function(from, to, text, message, isPrivateMessage) {
+
+		if (state.pmOnly && !isPrivateMessage) {
+			return bot.say(from, 'Sorry ' + from + ', I am only accepting votes through PM. ' + getVoteInstructions());
+		}
+
 		if (!state.isPollOpen) {
 			return bot.say(to, 'Poll is currently closed.  Sorry.');
 		}
 
-		//state.allowMultipleVotes
-		var previousVote = _.find(state.votes, function(item){
+		var previousVotes = _.filter(state.votes, function(item){
 				return item.voter === from;
 			});
 
 		//see if they have already voted
-		if (!_.isUndefined(previousVote) && !state.allowMultipleVotes) {
+		if (previousVotes.length && !state.allowMultipleVotes) {
 			return bot.say(to, 'Sorry ' + from + ', I already have your vote.');
 		}
 
-		//todo: make sure that even when allowing multiple votes that a voter does not vote for the same option more than once
+		function isDuplicateVote (voteLetter) {
+			return previousVotes.length && _.any(previousVotes, function(item) { return item.letter === voteLetter;});
+		}
 
 		//see if the vote given is an option letter
 		var command = text.toLowerCase().replace('#poll', '').trim();
@@ -271,8 +335,12 @@ module.exports = (function() {
 			if (_.any(state.answers, function (item) {
 					return item.index === index;
 				})) {
-				state.votes.push({voter: from, index: index, letter: letterForIndex(index)});
-				return bot.say(to, 'Vote taken! Thank you ' + from + '!');
+				if (!isDuplicateVote(letterForIndex(index))) {
+					state.votes.push({voter: from, index: index, letter: letterForIndex(index)});
+					return bot.say(to, 'Vote taken! Thank you ' + from + '!');
+				} else {
+					return bot.say(to, 'I already have that vote from you ' + from + ' - you can vote again but not for the same option.');
+				}
 			}
 		}
 
@@ -282,12 +350,15 @@ module.exports = (function() {
 		});
 
 		if (!_.isUndefined(matchedOption)) {
-			state.votes.push({voter: from, index: matchedOption.index, letter: matchedOption.letter});
-			return bot.say(to, 'Vote taken! Thank you!');
+			if (!isDuplicateVote(matchedOption.letter)) {
+				state.votes.push({voter: from, index: matchedOption.index, letter: matchedOption.letter});
+				return bot.say(to, 'Vote taken! Thank you ' + from + '!');
+			} else {
+				return bot.say(to, 'I already have that vote from you ' + from + ' - you can vote again but not for the same option.');
+			}
 		}
 
-
-		return bot.say(to, 'Sorry ' + from + ', didn`t understand that.  Please reply with #poll {Answer Letter}.  Use #poll to see the question and possible answers.');
+		return bot.say(to, 'Sorry ' + from + ', I didn`t understand that.  Please reply with #poll {Answer Letter}.  Use #poll to see the question and possible answers.');
 	});
 
     return function init (_bot) {
@@ -330,6 +401,7 @@ module.exports = (function() {
 							emit.emit('pollClose', from, to, text, message, isPrivateMessage);
 		                    break;
 	                    case '-results' :
+	                    case '-peek' :
 							emit.emit('pollResults', from, to, text, message, isPrivateMessage);
 		                    break;
 	                    case '-reset' :
@@ -349,9 +421,5 @@ module.exports = (function() {
 
 		});
 	};
-
-
-
-
 
 })();

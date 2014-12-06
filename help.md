@@ -105,3 +105,44 @@ KSHHK
 ### #hush [minutes]
 
 Shut zoidbox up for some minutes, default 15. Also available as `zoidbox hush`
+
+##Polling
+
+### #poll -create "question text" -options ["Option A", "Option B", "Option C"]
+
+Create a new poll.  There cannot be a poll currently created.  Please use double quotes for the question text and the answers.  There must be at least two possible answers.
+
+There are optional flags you can include (only at) the end of the -create command:
+
+- ```-open``` will immediately open the poll
+- ```-allowMultipleVotes``` will allow users to vote for multiple answers, but not the same answer multiple times.
+- ```-pmOnly``` will only allow votes to be cast through PM.
+
+### #poll -open
+
+Opens poll for voting
+
+### #poll -close
+
+Closes poll and tallies the results.
+
+### #poll -peek OR #poll -results
+
+Shows the provisional results of the poll
+
+### #poll or #poll -status
+
+Shows the current status of the poll, the question and the answers.
+
+### #poll {answer letter}
+
+Votes for that answer.
+
+### #poll -clear
+
+Clears all votes previously placed.
+
+### #poll -reset
+
+Clears the poll and votes.  You have to reset before you can create a new poll.
+
