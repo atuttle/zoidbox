@@ -61,7 +61,7 @@ module.exports = (function() {
 			return acc;
 		}, 'A');
 
-		return {letter: maxVotesLetter, answer: state.answers[indexForLetter(maxVotesLetter)].value, votes: talliedVotes[maxVotesLetter] || 0, talliedVotes: talliedVotes};
+		return {letter: maxVotesLetter, answer: state.answers[indexForLetter(maxVotesLetter)].value, votes: talliedVotes[maxVotesLetter] || 0, talliedVotes: talliedVotes, totalVotes: state.votes.length};
 
 	}
 
@@ -91,7 +91,7 @@ module.exports = (function() {
 			out += 'Poll was open for ';
 		}
 
-		out += getPollOpenDuration() + '\n';
+		out += getPollOpenDuration() + '. ~ ' + getVoterCount() + '\n';
 
 		return out + 'Question: `' + state.question + '` Options: ' + _.reduce(state.answers, function(acc, item) {
 			return acc += item.letter + ': `' + item.value + '` (' + getVotesForLetter(item.letter) + ' vote' + (getVotesForLetter(item.letter) !== 1 ? 's' : '') + ') ';
@@ -111,7 +111,7 @@ module.exports = (function() {
 	}
 
 	function getPollStatus () {
-		var out = (state.isPollOpen ? 'Poll Open! ' : 'Poll Closed. ') + (isValidQuestion() ? getQuestionDisplay() + getVoterCount() : '') + ' ';
+		var out = (state.isPollOpen ? 'Poll Open! ' : 'Poll Closed. ') + (isValidQuestion() ? getQuestionDisplay() + ' ~ ' + getVoterCount() : '') + ' ';
 		return out += (state.isPollOpen ? getVoteInstructions() : ' ');
 	}
 
@@ -153,7 +153,7 @@ module.exports = (function() {
 					}
 				} else if (doubleQuotePos !== -1) {
 					//we found a start double quote
-					var doubleQuotePos2 = item.indexOf('\'', doubleQuotePos+1);
+					var doubleQuotePos2 = item.indexOf('\"', doubleQuotePos+1);
 
 					if (doubleQuotePos2 === -1) {
 						acc.inDoubleQuotes = true;
@@ -207,7 +207,7 @@ module.exports = (function() {
 		return moment.duration(duration).humanize();
 	}
 
-	emit.on('pollCreate', function(from, to, text, message, isPrivateMessage) {
+	emit.on('pollCreate', function(from, to, text) {
 
 		if (isValidQuestion()) {
 			return bot.say(to, 'There is already a poll created ~ use #poll -reset to clear current poll first.');
@@ -224,21 +224,21 @@ module.exports = (function() {
 
 		var command = parseCommand(text.trim().split(' '));
 
-		function returnParseError() {
-			return bot.say(to, 'Invalid command. Please use the format: #poll -create {question} -options ["option A", "option B"] - please use double quotes');
+		function returnParseError(errorCode) {
+			return bot.say(to, 'Invalid command. Please use the format: #poll -create {question} -options ["option A", "option B"] - please use double quotes.  errorCode: ' + errorCode);
 		}
 
 		if (command[0] !== '#poll') {
-			returnParseError();
+			returnParseError('1');
 			return;
 		} else if (command[1] !== '-create') {
-			returnParseError();
+			returnParseError('2');
 			return;
 		} else if (command[3] !== '-options') {
-			returnParseError();
+			returnParseError('3');
 			return;
 		} else if (!_.isArray(command[4]) || command[4].length <= 1) {
-			returnParseError();
+			returnParseError('4');
 			return;
 		}
 
@@ -263,7 +263,7 @@ module.exports = (function() {
 
  	});
 
-	emit.on('pollOpen', function(from, to, text, message, isPrivateMessage) {
+	emit.on('pollOpen', function(from, to) {
 		if (!isValidQuestion()) {
 			return bot.say(to, 'Not ready to open.  Use #poll -create to set the question up first.  See #help for more info.');
 		}
@@ -273,11 +273,11 @@ module.exports = (function() {
 		bot.say(to, getPollStatus());
 	});
 
-	emit.on('pollStatus', function(from, to, text, message, isPrivateMessage) {
+	emit.on('pollStatus', function(from, to) {
 		bot.say(to, getPollStatus());
 	});
 
-	emit.on('pollClose', function(from, to, text, message, isPrivateMessage) {
+	emit.on('pollClose', function(from, to) {
 		if (!state.isPollOpen) {
 			return bot.say(to, 'Poll isn`t open...');
 		}
@@ -286,25 +286,36 @@ module.exports = (function() {
 		bot.say(to, getResultsDisplay());
 	});
 
-	emit.on('pollResults', function(from, to, text, message, isPrivateMessage) {
+	emit.on('pollResults', function(from, to) {
 		bot.say(to, getResultsDisplay());
 	});
 
-	emit.on('pollCheck', function(from, to, text, message, isPrivateMessage) {
+	emit.on('pollCheck', function(from, to) {
 		bot.say(to, getPollStatus());
 	});
 
-	emit.on('pollReset', function(from, to, text, message, isPrivateMessage) {
+	emit.on('pollReset', function(from, to) {
 		state = _.cloneDeep(defaultState);
 		bot.say(to, 'Poll reset.');
 	});
 
-	emit.on('pollClear', function(from, to, text, message, isPrivateMessage) {
+	emit.on('pollClear', function(from, to) {
 		state.votes = [];
 		bot.say(to, 'All Poll results cleared.');
 	});
 
 	emit.on('pollVote', function(from, to, text, message, isPrivateMessage) {
+
+		function voteTakenResponse(from) {
+			return _.sample([
+				'Vote taken! Thank you ' + from + '!',
+				'I`ve got your vote ' + from,
+				'Really ' + from + '? Ok...',
+				'Your voice has been heard ' + from,
+				from + ' I have your vote down',
+				'Thank you for voting ' + from
+			]);
+		}
 
 		if (state.pmOnly && !isPrivateMessage) {
 			return bot.say(from, 'Sorry ' + from + ', I am only accepting votes through PM. ' + getVoteInstructions());
@@ -337,7 +348,7 @@ module.exports = (function() {
 				})) {
 				if (!isDuplicateVote(letterForIndex(index))) {
 					state.votes.push({voter: from, index: index, letter: letterForIndex(index)});
-					return bot.say(to, 'Vote taken! Thank you ' + from + '!');
+					return bot.say(to, voteTakenResponse(from));
 				} else {
 					return bot.say(to, 'I already have that vote from you ' + from + ' - you can vote again but not for the same option.');
 				}
@@ -352,7 +363,7 @@ module.exports = (function() {
 		if (!_.isUndefined(matchedOption)) {
 			if (!isDuplicateVote(matchedOption.letter)) {
 				state.votes.push({voter: from, index: matchedOption.index, letter: matchedOption.letter});
-				return bot.say(to, 'Vote taken! Thank you ' + from + '!');
+				return bot.say(to, voteTakenResponse(from));
 			} else {
 				return bot.say(to, 'I already have that vote from you ' + from + ' - you can vote again but not for the same option.');
 			}
