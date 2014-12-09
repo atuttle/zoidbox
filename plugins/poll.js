@@ -304,6 +304,13 @@ module.exports = (function() {
 		bot.say(to, 'All Poll results cleared.');
 	});
 
+	emit.on('pollRescind', function(from, to) {
+
+		state.votes = _.reject(state.votes, function(vote) { return vote.voter.toLowerCase() === from.toLowerCase();});
+
+		return bot.say(to, 'All of your votes in the current poll have been rescinded ' + from + '. You may now vote again.');
+	});
+
 	emit.on('pollVote', function(from, to, text, message, isPrivateMessage) {
 
 		function voteTakenResponse(from) {
@@ -420,6 +427,9 @@ module.exports = (function() {
 		                    break;
 	                    case '-clear' :
 							emit.emit('pollClear', from, to, text, message, isPrivateMessage);
+		                    break;
+	                    case '-rescind' :
+							emit.emit('pollRescind', from, to, text, message, isPrivateMessage);
 		                    break;
 	                    default : //they have said #poll [something], assume they are trying to vote
 		                    emit.emit('pollVote', from, to, text, message, isPrivateMessage);

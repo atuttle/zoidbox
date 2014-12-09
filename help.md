@@ -138,6 +138,10 @@ Shows the current status of the poll, the question and the answers.
 
 Votes for that answer.
 
+### #poll -rescind
+
+Rescind all of your votes from the current poll.
+
 ### #poll -clear
 
 Clears all votes previously placed.
