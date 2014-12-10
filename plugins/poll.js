@@ -73,18 +73,28 @@ module.exports = (function() {
 			return acc;
 		}, {});
 
-		var maxVotesLetter = _.reduce(talliedVotes, function(acc, item, key, list){
-			if (list[key] > (list[acc] || 0) ) {
-				return key;
+		var maxVotes = _.reduce(talliedVotes, function(acc, item){
+			if (item > (acc || 0) ) {
+				return item;
 			}
 			return acc;
-		}, 'A');
+		}, 0);
 
-		return {letter: maxVotesLetter, answer: state.answers[indexForLetter(maxVotesLetter)].value, votes: talliedVotes[maxVotesLetter] || 0, talliedVotes: talliedVotes, totalVotes: state.votes.length};
+		var maxVoteLetters = _.map(
+								_.filter(
+									_.map(talliedVotes, function(item, key) {
+										return {letter: key, value: item};
+									}), function(item) {
+									return item.value === maxVotes;
+								}), function(item) {
+								return item.letter;
+							});
+
+		return {letters: maxVoteLetters, votes: maxVotes || 0, talliedVotes: talliedVotes, totalVotes: state.votes.length};
 	}
 
 	function getResultsDisplay () {
-		if (state.votes.length === 0) {
+		if (!isValidQuestion()) {
 			return 'Poll Closed';
 		}
 
@@ -94,18 +104,38 @@ module.exports = (function() {
 			return winner.talliedVotes[letter] || 0;
 		}
 
-		//todo: handle ties
-		//todo: handle no votes
+		function getAnswerForLetter (letter) {
+			return state.answers[indexForLetter(letter)].value
+		}
 
 		var out = '';
 
-		if (state.isPollOpen) {
-			out += 'The current leader is ';
+		if (state.votes.length === 0) {
+			out += 'No votes yet! ';
 		} else {
-			out += 'The winner is ';
-		}
+			if (winner.letters.length > 1) {
+				if (state.isPollOpen) {
+					out += 'It is currently a tie between ';
+				} else {
+					out += 'There was a tie between ';
+				}
 
-		out += winner.letter + ': `' + winner.answer + '` with ' + winner.votes + ' vote' + (winner.votes !== 1 ? 's' : '') + '! ';
+				out += _.reduce(winner.letters, function(acc, letter, index) {
+					if (index > 0) {acc += ' and ';}
+					return acc + letter + ': `' + getAnswerForLetter(letter) + '`';
+				}, '');
+
+				out += ' with ' + winner.votes + ' vote' + (winner.votes !== 1 ? 's' : '') + '! ';
+			} else {
+				if (state.isPollOpen) {
+					out += 'The current leader is ';
+				} else {
+					out += 'The winner is ';
+				}
+
+				out += winner.letters[0] + ': `' + getAnswerForLetter(winner.letters[0])+ '` with ' + winner.votes + ' vote' + (winner.votes !== 1 ? 's' : '') + '! ';
+			}
+		}
 
 		if (state.isPollOpen) {
 			out += 'Poll has been open for ';
