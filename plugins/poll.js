@@ -25,6 +25,25 @@ module.exports = (function() {
 	},
 	state = {};
 
+	function saveState () {
+		redis.set('poll_state', JSON.stringify(state));
+	}
+
+	function restoreState () {
+		redis.get('poll_state', function(err, data) {
+			if (err) {
+				console.error('poll.restoreState() error:', err);
+			} else {
+				try {
+					state = JSON.parse(data);
+				} catch (e) {
+					log('poll.restoreState() JSON parse error', data);
+				}
+
+			}
+		});
+	}
+
 	function letterForIndex (index) {
 		return String.fromCharCode(65 + index);
 	}
@@ -39,7 +58,7 @@ module.exports = (function() {
 
 	function getQuestionDisplay () {
 		return 'Question: `' + state.question + '` Options: ' + _.reduce(state.answers, function(acc, item, index) {
-			return acc += letterForIndex(index) + ': `' + item.value + '` ';
+			return acc + letterForIndex(index) + ': `' + item.value + '` ';
 		}, '');
 	}
 
@@ -62,10 +81,13 @@ module.exports = (function() {
 		}, 'A');
 
 		return {letter: maxVotesLetter, answer: state.answers[indexForLetter(maxVotesLetter)].value, votes: talliedVotes[maxVotesLetter] || 0, talliedVotes: talliedVotes, totalVotes: state.votes.length};
-
 	}
 
 	function getResultsDisplay () {
+		if (state.votes.length === 0) {
+			return 'Poll Closed';
+		}
+
 		var winner = getWinner();
 
 		function getVotesForLetter (letter) {
@@ -94,7 +116,7 @@ module.exports = (function() {
 		out += getPollOpenDuration() + '. ~ ' + getVoterCount() + '\n';
 
 		return out + 'Question: `' + state.question + '` Options: ' + _.reduce(state.answers, function(acc, item) {
-			return acc += item.letter + ': `' + item.value + '` (' + getVotesForLetter(item.letter) + ' vote' + (getVotesForLetter(item.letter) !== 1 ? 's' : '') + ') ';
+			return acc + item.letter + ': `' + item.value + '` (' + getVotesForLetter(item.letter) + ' vote' + (getVotesForLetter(item.letter) !== 1 ? 's' : '') + ') ';
 		}, '');
 	}
 
@@ -112,7 +134,7 @@ module.exports = (function() {
 
 	function getPollStatus () {
 		var out = (state.isPollOpen ? 'Poll Open! ' : 'Poll Closed. ') + (isValidQuestion() ? getQuestionDisplay() + ' ~ ' + getVoterCount() : '') + ' ';
-		return out += (state.isPollOpen ? getVoteInstructions() : ' ');
+		return out + (state.isPollOpen ? getVoteInstructions() : ' ');
 	}
 
 	function parseCommand (args) {
@@ -191,12 +213,16 @@ module.exports = (function() {
 		state.isPollOpen = true;
 		state.pollOpenTime = new Date().getTime();
 		state.pollOpenDuration = 0;
+
+		saveState();
 	}
 
 	function closePoll () {
 		state.isPollOpen = false;
 		state.pollOpenDuration += new Date().getTime() - state.pollOpenTime;
 		state.pollOpenTime = 0;
+
+		saveState();
 	}
 
 	function getPollOpenDuration () {
@@ -258,6 +284,7 @@ module.exports = (function() {
 
 			return bot.say(to, getPollStatus());
 		} else {
+			saveState();
 			return bot.say(to, 'Poll created; Use #poll -open to start!');
 		}
 
@@ -296,6 +323,7 @@ module.exports = (function() {
 
 	emit.on('pollReset', function(from, to) {
 		state = _.cloneDeep(defaultState);
+		saveState();
 		bot.say(to, 'Poll reset.');
 	});
 
@@ -307,6 +335,8 @@ module.exports = (function() {
 	emit.on('pollRescind', function(from, to) {
 
 		state.votes = _.reject(state.votes, function(vote) { return vote.voter.toLowerCase() === from.toLowerCase();});
+
+		saveState();
 
 		return bot.say(to, 'All of your votes in the current poll have been rescinded ' + from + '. You may now vote again.');
 	});
@@ -355,6 +385,7 @@ module.exports = (function() {
 				})) {
 				if (!isDuplicateVote(letterForIndex(index))) {
 					state.votes.push({voter: from, index: index, letter: letterForIndex(index)});
+					saveState();
 					return bot.say(to, voteTakenResponse(from));
 				} else {
 					return bot.say(to, 'I already have that vote from you ' + from + ' - you can vote again but not for the same option.');
@@ -370,6 +401,7 @@ module.exports = (function() {
 		if (!_.isUndefined(matchedOption)) {
 			if (!isDuplicateVote(matchedOption.letter)) {
 				state.votes.push({voter: from, index: matchedOption.index, letter: matchedOption.letter});
+				saveState();
 				return bot.say(to, voteTakenResponse(from));
 			} else {
 				return bot.say(to, 'I already have that vote from you ' + from + ' - you can vote again but not for the same option.');
@@ -386,6 +418,8 @@ module.exports = (function() {
 		redis = bot.redis;
 
 	    state = _.cloneDeep(defaultState);
+
+	    restoreState();
 
 	    bot.on( 'message', function (from, to, text, message){
 
