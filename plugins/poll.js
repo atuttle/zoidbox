@@ -33,7 +33,7 @@ module.exports = (function() {
 		redis.get('poll_state', function(err, data) {
 			if (err) {
 				console.error('poll.restoreState() error:', err);
-			} else {
+			} else if (data !== null) {
 				try {
 					state = JSON.parse(data);
 				} catch (e) {
