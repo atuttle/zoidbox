@@ -273,7 +273,8 @@ module.exports = (function(){
 			bot.say(to, 'You can\'t give karma to yourself ಠ_ಠ');
 		} else {
 			if (!bot.isCurrentlyOnline(to, nick)) {
-				bot.say(to, 'who is ' + nick + '?');
+				//dont reply if no match or users is not currently online.
+				//bot.say(to, 'who is ' + nick + '?');
 			} else {
                 isBannedFromKarma(to, nick, function(err, data) {
                     if (data) {

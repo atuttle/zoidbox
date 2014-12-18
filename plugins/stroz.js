@@ -54,6 +54,8 @@ module.exports = (function(){
 			,'occupy me {from}'
 			,'this is some podman-level nonsense'
 			,'like I said, you were doing it wrong'
+			,'You want to take this outside {from}?'
+			,'Do you kiss your mother with that mouth?'
 		];
 
 		return zoidisms[Math.floor(Math.random() * zoidisms.length)].split('{from}').join(from);
