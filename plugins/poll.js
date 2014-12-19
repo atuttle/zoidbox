@@ -151,11 +151,18 @@ module.exports = (function() {
 	}
 
 	function getVoteInstructions () {
+		var msg = '';
 		if (state.pmOnly) {
-			return 'Use /msg ' + bot.botName + ' #poll {answer letter}';
+			msg = 'Use /msg ' + bot.botName + ' #poll {answer letter}';
 		} else {
-			return 'Use #poll {answer letter} ~ You can also vote through PM.';
+			msg = 'Use #poll {answer letter} ~ You can also vote through PM.';
 		}
+
+		if (state.allowMultipleVotes) {
+			msg += ' ~ You may vote for multiple options.';
+		}
+
+		return msg;
 	}
 
 	function getVoterCount () {
