@@ -29,7 +29,12 @@ module.exports = (function(){
 				} else if (text.slice(-5) === ' over' ){
 					bot.say(to, 'KSHHHK');
 				} else if (text.toLowerCase().indexOf(me) !== -1 && from !== me && from !== 'zoidbox') {
-					bot.say(to, randomZoidism(from));
+					var msg = randomZoidism(from);
+					if (msg.indexOf('/me') === 0) {
+						bot.action(to, msg.replace('/me', '').trim());
+					} else {
+						bot.say(to, msg);
+					}
 				}
 			}
 
@@ -56,6 +61,13 @@ module.exports = (function(){
 			,'like I said, you were doing it wrong'
 			,'You want to take this outside {from}?'
 			,'Do you kiss your mother with that mouth?'
+			,'My ears are burning'
+			,'On the other side of the screen, it all looks so easy.'
+			,'/me is starting to hear things...'
+			,'/me thinks {from} talks too much.'
+			,'{from} has died of dysentery'
+			,'I find your lack of faith disturbing.'
+			,'/me is looking for a new job'
 		];
 
 		return zoidisms[Math.floor(Math.random() * zoidisms.length)].split('{from}').join(from);
