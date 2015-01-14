@@ -64,10 +64,10 @@ show message counts for that `nick`
 
 posts a random zoidism
 
-### zoidbox (can|is|should|will|are|has|have|do)
+### zoidbox {any question}?
 ### zoidbox 8ball
 
-zoidbox replies with a magic 8ball response.  example: zoidbox, can I do this?
+zoidbox replies with a magic 8ball response.  The question must end in a question mark. example: zoidbox, can I do this?
 
 ### #maxusers
 

@@ -27,7 +27,7 @@ module.exports = (function(){
 			var msg = '';
 			var parts = text.split(' ');
 
-			if (parts.length > 1 && parts[0].toLowerCase().indexOf(me) === 0 && (_.contains(['should','can','will','are','is','has','have','do','8ball'], parts[1].toLowerCase()))) {
+			if (parts.length > 1 && parts[0].toLowerCase().indexOf(me) === 0 && text.trim().split('').reverse().join('').indexOf('?') === 0) {
 				//magic 8 ball;
 				msg = random8ball(from);
 				if (msg.indexOf('/me') === 0) {
