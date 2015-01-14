@@ -11,7 +11,8 @@ module.exports = (function(){
 		redis,
 		log,
 		conf,
-		currentlyOnline = {};
+		currentlyOnline = {},
+		maxUsers = {};
 
 	emit.on('lastseen', function(from, to, text) {
 		var nick = text.replace('#lastseen', '').trim();
@@ -85,6 +86,28 @@ module.exports = (function(){
 		bot.say(to, 'I see: ' + currentlyOnlineUsers.join(', '));
 	});
 
+	emit.on('maxcount', function(from, channel, text) {
+		var parts = text.split(' ');
+		var checkChannel = channel;
+		if (parts.length > 1) {
+			checkChannel = parts[1].toLowerCase().trim();
+		}
+
+		getMaxUsers(checkChannel, function(err, data){
+			if (err) return console.error(err);
+			if (!_.isNull(data) && data.length > 0) {
+				try {
+					data = JSON.parse(data);
+					return bot.say(channel, 'The most I`ve seen in ' + checkChannel + ' was ' + data.maxUserCount + ' users on ' + moment(data.dte).format('MMMM Do YYYY, HH:mm:ss Z'));
+				} catch (e) {}
+			}
+			getChannels(function(err, channels){
+				bot.say(channel, 'I`m not familiar with ' + checkChannel + '. I have information for the following channels: ' + channels.join(', '));
+			});
+
+		});
+	});
+
     function displayStatsForChannel (channel, replyToChannel) {
         getChannelMessageCount(channel, function(err, channelMessageCount){
             getMessageCountLeaderboard(channel, function(err, data){
@@ -124,10 +147,27 @@ module.exports = (function(){
 			if (isOnline) {
                 log('setCurrentlyOnline:', channel, nick, isOnline);
 				currentlyOnline[channel + '.' + nick.toLowerCase()] = 1;
+				checkMaxUsers(channel);
 			} else {
                 log('clearingCurrentlyOnline:', channel, nick, isOnline);
 				delete currentlyOnline[channel + '.' + nick.toLowerCase()];
+
 			}
+		}
+	}
+
+	function checkMaxUsers (channel) {
+		//get the current count of users in this channel
+		var cnt = _.reduce(currentlyOnline, function(acc, item, key) {
+			if (key.indexOf(channel) === 0) {
+				acc++;
+			}
+			return acc;
+		}, 0);
+		if (cnt > maxUsers[channel]) {
+			bot.say(bot.conf.get('testingChannel'), 'New max user count in ' + channel + ' with ' + cnt + ' users!');
+			maxUsers[channel] = cnt;
+			setMaxUsers(cnt, channel);
 		}
 	}
 
@@ -137,6 +177,14 @@ module.exports = (function(){
 			}), function(item) {
 				return item.replace(channel + '.', '');
 			});
+	}
+
+	function setMaxUsers (maxUsersCount, channel) {
+		redis.set(bot.botName + '.' + channel.toLowerCase() + '.maxUsers', JSON.stringify({maxUserCount: maxUsersCount, dte: new Date().getTime()}));
+	}
+
+	function getMaxUsers (channel, callback) {
+		redis.get(bot.botName + '.' + channel.toLowerCase() + '.maxUsers', callback);
 	}
 
 	function isCurrentlyOnline (channel, nick) {
@@ -177,6 +225,27 @@ module.exports = (function(){
 		redis = bot.redis;
 
 		bot.getChannels = getChannels;
+
+		//get the max users for the current channels and save them
+		getChannels(function(err, channels) {
+			_.each(channels, function(channel){
+				getMaxUsers(channel, function(err, data){
+					maxUsers[channel] = 0;
+
+					if (err) return console.error(err);
+					if (!_.isNull(data) && data.length > 0) {
+						try {
+							data = JSON.parse(data);
+							maxUsers[channel] = data.maxUsersCount;
+						} catch (e) {}
+					} else {
+						setMaxUsers(0, channel);
+					}
+
+					log('populate maxusers', channel, maxUsers[channel]);
+				});
+			});
+		});
 
 		bot.addListener('part', function(channel, nick, reason) {
 			log('part', channel, nick, reason);
@@ -236,6 +305,8 @@ module.exports = (function(){
 				emit.emit('stats', from, to, text);
 			} else if (text.indexOf('#random') === 0) {
 				emit.emit('random', from, to, text);
+			} else if (text.indexOf('#maxusers') === 0) {
+				emit.emit('maxcount', from, to, text);
 			} else if (text.indexOf('#currentlyonline') === 0) {
 				emit.emit('currentlyonline', from, to, text);
 			}

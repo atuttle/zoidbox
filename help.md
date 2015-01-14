@@ -69,6 +69,10 @@ posts a random zoidism
 
 zoidbox replies with a magic 8ball response.  example: zoidbox, can I do this?
 
+### #maxusers
+
+shows the most number of users in the current channel and when.  You can also use #maxusers {channel} to get info for other channels that zoidbox is part of.
+
 ### !CFMLfunctionOrTagName
 
 posts docs summary and link for requested function or tag from [cfdocs.org](http://cfdocs.org).  You can also do !cfscriptref for Adam Cameron's CFScript Reference.
