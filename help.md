@@ -64,6 +64,11 @@ show message counts for that `nick`
 
 posts a random zoidism
 
+### zoidbox (can|is|should|will|are|has|have|do)
+### zoidbox 8ball
+
+zoidbox replies with a magic 8ball response.  example: zoidbox, can I do this?
+
 ### !CFMLfunctionOrTagName
 
 posts docs summary and link for requested function or tag from [cfdocs.org](http://cfdocs.org).  You can also do !cfscriptref for Adam Cameron's CFScript Reference.
