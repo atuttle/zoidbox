@@ -73,6 +73,10 @@ zoidbox replies with a magic 8ball response.  The question must end in a questio
 
 shows the most number of users in the current channel and when.  You can also use #maxusers {channel} to get info for other channels that zoidbox is part of.
 
+### #time
+
+shows the current UTC time.
+
 ### !CFMLfunctionOrTagName
 
 posts docs summary and link for requested function or tag from [cfdocs.org](http://cfdocs.org).  You can also do !cfscriptref for Adam Cameron's CFScript Reference.

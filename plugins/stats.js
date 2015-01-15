@@ -14,6 +14,25 @@ module.exports = (function(){
 		currentlyOnline = {},
 		maxUsers = {};
 
+	emit.on('time', function (from, channel, text) {
+		var parts = text.trim().split(' ');
+		var utc = moment().utc();
+
+		if (parts.length === 1) {
+			//utc time
+			return bot.say(channel, 'It is currently ' + utc.format('YYYY-MM-DD HH:mm [UTC]'));
+		} else {
+			try {
+				var tme = utc.utcOffset(parts[1]);
+				return bot.say(channel, 'It is currently ' + tme.format('YYYY-MM-DD HH:mm Z'));
+			} catch (e) {
+			}
+
+		}
+
+		return bot.say(channel, 'I don`t know how to respond to that.');
+	});
+
 	emit.on('lastseen', function(from, to, text) {
 		var nick = text.replace('#lastseen', '').trim();
 
@@ -309,6 +328,8 @@ module.exports = (function(){
 				emit.emit('maxcount', from, to, text);
 			} else if (text.indexOf('#currentlyonline') === 0) {
 				emit.emit('currentlyonline', from, to, text);
+			} else if (text.indexOf('#time') === 0) {
+				emit.emit('time', from, to, text);
 			}
 
 		});
