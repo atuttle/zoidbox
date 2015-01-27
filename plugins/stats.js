@@ -215,10 +215,17 @@ module.exports = (function(){
         redis.smembers(bot.botName + '.channels', callback);
     }
 
-	function countMessage (channel, nick) {
+	function countMessage (channel, nick, text) {
         redis.sadd(bot.botName + '.channels', channel);
 		redis.hincrby(bot.botName + '.' + channel + '.messageCount', channel, 1);
 		redis.hincrby(bot.botName + '.' + channel + '.messageCount', nick.toLowerCase(), 1);
+
+		getNickMessageCount(channel, nick, function(err, data) {
+			if (data !== null && _.isNumber(_.parseInt(data)) && data % 1000 === 0) {
+				var time = moment().seconds(5 * data).fromNow(true);
+				bot.say(channel, 'Congrats ' + nick + '! Your ' + data + 'th message was: `' + text + '` ~ guessing an average of 5 seconds per message, that`s about ' + time + ' spent in IRC!');
+			}
+		});
 	}
 
 	function getChannelMessageCount (channel, callback) {
@@ -311,7 +318,7 @@ module.exports = (function(){
 			if (bot.isChannelPaused(to)) return;
 
 			setLastSeen(to, from);
-			countMessage(to, from);
+			countMessage(to, from, text);
 
 			if (to === bot.botName) {
 				//they are talking to us in a private message, set to to be from
