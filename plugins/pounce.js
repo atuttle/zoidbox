@@ -4,6 +4,7 @@ module.exports = (function(){
 
 	var bot;
 	var _ = require( 'lodash' );
+	var moment = require('moment');
 
 	return function init( _bot ){
 		bot = _bot;
@@ -72,7 +73,7 @@ module.exports = (function(){
 
 	function addPounce( chan, nick, from, msg ){
 		bot.redis.sadd( chan + '.pouncees', nick.toLowerCase() );
-		bot.redis.sadd( chan + '.pounce.' + nick.toLowerCase(), JSON.stringify({ from: from, msg: msg }) );
+		bot.redis.sadd( chan + '.pounce.' + nick.toLowerCase(), JSON.stringify({ from: from, msg: msg, time: new Date().getTime() }) );
 		return true;
 	}
 
@@ -99,7 +100,8 @@ module.exports = (function(){
 							console.log(pounces[p]);
 							var data = JSON.parse( pounces[p] );
 							console.log(data);
-							bot.say( chan, nick + ': ' + data.from + ' wanted me to tell you, `' + data.msg + '`');
+
+							bot.say( chan, nick + ': ' + data.from + ' wanted me to tell you, `' + data.msg + '` ~ sent: ' + moment(data.time).toISOString());
 						}
 						bot.redis.del( chan + '.pounce.' + nick );
 						bot.redis.srem( chan + '.pouncees', nick );
