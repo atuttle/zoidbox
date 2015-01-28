@@ -11,7 +11,27 @@ module.exports = (function(){
 		redis,
 		log,
 		conf,
-		currentlyOnline = {};
+		currentlyOnline = {},
+		maxUsers = {};
+
+	emit.on('time', function (from, channel, text) {
+		var parts = text.trim().split(' ');
+		var utc = moment().utc();
+
+		if (parts.length === 1) {
+			//utc time
+			return bot.say(channel, 'It is currently ' + utc.format('YYYY-MM-DD HH:mm [UTC]'));
+		} else {
+			try {
+				var tme = utc.utcOffset(parts[1]);
+				return bot.say(channel, 'It is currently ' + tme.format('YYYY-MM-DD HH:mm Z'));
+			} catch (e) {
+			}
+
+		}
+
+		return bot.say(channel, 'I don`t know how to respond to that.');
+	});
 
 	emit.on('lastseen', function(from, to, text) {
 		var nick = text.replace('#lastseen', '').trim();
@@ -85,6 +105,28 @@ module.exports = (function(){
 		bot.say(to, 'I see: ' + currentlyOnlineUsers.join(', '));
 	});
 
+	emit.on('maxcount', function(from, channel, text) {
+		var parts = text.split(' ');
+		var checkChannel = channel;
+		if (parts.length > 1) {
+			checkChannel = parts[1].toLowerCase().trim();
+		}
+
+		getMaxUsers(checkChannel, function(err, data){
+			if (err) return console.error(err);
+			if (!_.isNull(data) && data.length > 0) {
+				try {
+					data = JSON.parse(data);
+					return bot.say(channel, 'The most I`ve seen in ' + checkChannel + ' was ' + data.maxUserCount + ' users on ' + moment(data.dte).format('MMMM Do YYYY, HH:mm:ss Z'));
+				} catch (e) {}
+			}
+			getChannels(function(err, channels){
+				bot.say(channel, 'I`m not familiar with ' + checkChannel + '. I have information for the following channels: ' + channels.join(', '));
+			});
+
+		});
+	});
+
     function displayStatsForChannel (channel, replyToChannel) {
         getChannelMessageCount(channel, function(err, channelMessageCount){
             getMessageCountLeaderboard(channel, function(err, data){
@@ -124,10 +166,27 @@ module.exports = (function(){
 			if (isOnline) {
                 log('setCurrentlyOnline:', channel, nick, isOnline);
 				currentlyOnline[channel + '.' + nick.toLowerCase()] = 1;
+				checkMaxUsers(channel);
 			} else {
                 log('clearingCurrentlyOnline:', channel, nick, isOnline);
 				delete currentlyOnline[channel + '.' + nick.toLowerCase()];
+
 			}
+		}
+	}
+
+	function checkMaxUsers (channel) {
+		//get the current count of users in this channel
+		var cnt = _.reduce(currentlyOnline, function(acc, item, key) {
+			if (key.indexOf(channel) === 0) {
+				acc++;
+			}
+			return acc;
+		}, 0);
+		if (cnt > maxUsers[channel]) {
+			bot.say(bot.conf.get('testingChannel'), 'New max user count in ' + channel + ' with ' + cnt + ' users!');
+			maxUsers[channel] = cnt;
+			setMaxUsers(cnt, channel);
 		}
 	}
 
@@ -139,6 +198,14 @@ module.exports = (function(){
 			});
 	}
 
+	function setMaxUsers (maxUsersCount, channel) {
+		redis.set(bot.botName + '.' + channel.toLowerCase() + '.maxUsers', JSON.stringify({maxUserCount: maxUsersCount, dte: new Date().getTime()}));
+	}
+
+	function getMaxUsers (channel, callback) {
+		redis.get(bot.botName + '.' + channel.toLowerCase() + '.maxUsers', callback);
+	}
+
 	function isCurrentlyOnline (channel, nick) {
         log('isCurrentlyOnline:', channel, nick, currentlyOnline, currentlyOnline[channel + '.' + nick.toLowerCase()]);
 		return !_.isUndefined(currentlyOnline[channel + '.' + nick.toLowerCase()]);
@@ -148,10 +215,17 @@ module.exports = (function(){
         redis.smembers(bot.botName + '.channels', callback);
     }
 
-	function countMessage (channel, nick) {
+	function countMessage (channel, nick, text) {
         redis.sadd(bot.botName + '.channels', channel);
 		redis.hincrby(bot.botName + '.' + channel + '.messageCount', channel, 1);
 		redis.hincrby(bot.botName + '.' + channel + '.messageCount', nick.toLowerCase(), 1);
+
+		getNickMessageCount(channel, nick, function(err, data) {
+			if (data !== null && _.isNumber(_.parseInt(data)) && data % 1000 === 0) {
+				var time = moment().seconds(5 * data).fromNow(true);
+				bot.say(channel, 'Congrats ' + nick + '! Your ' + data + 'th message was: `' + text + '` ~ guessing an average of 5 seconds per message, that`s about ' + time + ' spent in IRC!');
+			}
+		});
 	}
 
 	function getChannelMessageCount (channel, callback) {
@@ -177,6 +251,27 @@ module.exports = (function(){
 		redis = bot.redis;
 
 		bot.getChannels = getChannels;
+
+		//get the max users for the current channels and save them
+		getChannels(function(err, channels) {
+			_.each(channels, function(channel){
+				getMaxUsers(channel, function(err, data){
+					maxUsers[channel] = 0;
+
+					if (err) return console.error(err);
+					if (!_.isNull(data) && data.length > 0) {
+						try {
+							data = JSON.parse(data);
+							maxUsers[channel] = data.maxUsersCount;
+						} catch (e) {}
+					} else {
+						setMaxUsers(0, channel);
+					}
+
+					log('populate maxusers', channel, maxUsers[channel]);
+				});
+			});
+		});
 
 		bot.addListener('part', function(channel, nick, reason) {
 			log('part', channel, nick, reason);
@@ -223,7 +318,7 @@ module.exports = (function(){
 			if (bot.isChannelPaused(to)) return;
 
 			setLastSeen(to, from);
-			countMessage(to, from);
+			countMessage(to, from, text);
 
 			if (to === bot.botName) {
 				//they are talking to us in a private message, set to to be from
@@ -236,8 +331,12 @@ module.exports = (function(){
 				emit.emit('stats', from, to, text);
 			} else if (text.indexOf('#random') === 0) {
 				emit.emit('random', from, to, text);
+			} else if (text.indexOf('#maxusers') === 0) {
+				emit.emit('maxcount', from, to, text);
 			} else if (text.indexOf('#currentlyonline') === 0) {
 				emit.emit('currentlyonline', from, to, text);
+			} else if (text.indexOf('#time') === 0) {
+				emit.emit('time', from, to, text);
 			}
 
 		});

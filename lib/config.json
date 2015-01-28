@@ -1,5 +1,6 @@
 {
 	 "channels": [ "##coldfusion", "#zoidbox" ]
+	,"testingChannel": "#zoidbox"
 	,"server": "irc.freenode.net"
 	,"botName": "zoidbox"
 	,"redis_port": 6379

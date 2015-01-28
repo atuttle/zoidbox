@@ -64,6 +64,19 @@ show message counts for that `nick`
 
 posts a random zoidism
 
+### zoidbox {any question}?
+### zoidbox 8ball
+
+zoidbox replies with a magic 8ball response.  The question must end in a question mark. example: zoidbox, can I do this?
+
+### #maxusers
+
+shows the most number of users in the current channel and when.  You can also use #maxusers {channel} to get info for other channels that zoidbox is part of.
+
+### #time
+
+shows the current UTC time.
+
 ### !CFMLfunctionOrTagName
 
 posts docs summary and link for requested function or tag from [cfdocs.org](http://cfdocs.org).  You can also do !cfscriptref for Adam Cameron's CFScript Reference.
@@ -105,3 +118,48 @@ KSHHK
 ### #hush [minutes]
 
 Shut zoidbox up for some minutes, default 15. Also available as `zoidbox hush`
+
+##Polling
+
+### #poll -create "question text" -options ["Option A", "Option B", "Option C"]
+
+Create a new poll.  There cannot be a poll currently created.  Please use double quotes for the question text and the answers.  There must be at least two possible answers.
+
+There are optional flags you can include (only at) the end of the -create command:
+
+- ```-open``` will immediately open the poll
+- ```-allowMultipleVotes``` will allow users to vote for multiple answers, but not the same answer multiple times.
+- ```-pmOnly``` will only allow votes to be cast through PM.
+
+### #poll -open
+
+Opens poll for voting
+
+### #poll -close
+
+Closes poll and tallies the results.
+
+### #poll -peek OR #poll -results
+
+Shows the provisional results of the poll
+
+### #poll or #poll -status
+
+Shows the current status of the poll, the question and the answers.
+
+### #poll {answer letter}
+
+Votes for that answer.
+
+### #poll -rescind
+
+Rescind all of your votes from the current poll.
+
+### #poll -clear
+
+Clears all votes previously placed.
+
+### #poll -reset
+
+Clears the poll and votes.  You have to reset before you can create a new poll.
+

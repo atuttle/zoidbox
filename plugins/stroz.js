@@ -2,6 +2,7 @@
 
 module.exports = (function(){
 
+	var _ = require('lodash');
 	var bot,
         conf,
         hushed = false;
@@ -9,19 +10,32 @@ module.exports = (function(){
 	return function init (_bot){
 		bot = _bot;
         conf = bot.conf;
-		bot.on( 'message#', function( from, to, text ){
+
+		bot.on( 'message#', function( from, to, text ) {
 
 			if (bot.isChannelPaused(to)) return;
 
 			var me = bot.conf.get('botName').toLowerCase();
-			if ( from.toLowerCase() === me ){
+			if (from.toLowerCase() === me) {
 				return;
 			}
 
-			if ( hushed !== false ) {
+			if (hushed !== false) {
 				checkHushed();
 			}
-			if (text.indexOf('#hush') === 0 || (text.indexOf(me) === 0) && text.search(/\bhush\b/) > 0) {
+
+			var msg = '';
+			var parts = text.split(' ');
+
+			if (parts.length > 1 && parts[0].toLowerCase().indexOf(me) === 0 && text.trim().split('').reverse().join('').indexOf('?') === 0) {
+				//magic 8 ball;
+				msg = random8ball(from);
+				if (msg.indexOf('/me') === 0) {
+					return bot.action(to, msg.replace('/me', '').trim());
+				} else {
+					return bot.say(to, msg);
+				}
+			} else if (text.indexOf('#hush') === 0 || (text.indexOf(me) === 0) && text.search(/\bhush\b/) > 0) {
 				hush(from, text);
 			} else if (!hushed) {
 				if (text.indexOf('box install ') === 0) {
@@ -29,7 +43,12 @@ module.exports = (function(){
 				} else if (text.slice(-5) === ' over' ){
 					bot.say(to, 'KSHHHK');
 				} else if (text.toLowerCase().indexOf(me) !== -1 && from !== me && from !== 'zoidbox') {
-					bot.say(to, randomZoidism(from));
+					msg = randomZoidism(from);
+					if (msg.indexOf('/me') === 0) {
+						return bot.action(to, msg.replace('/me', '').trim());
+					} else {
+						return bot.say(to, msg);
+					}
 				}
 			}
 
@@ -53,9 +72,45 @@ module.exports = (function(){
 			,'the giants'
 			,'occupy me {from}'
 			,'this is some podman-level nonsense'
+			,'like I said, you were doing it wrong'
+			,'You want to take this outside {from}?'
+			,'Do you kiss your mother with that mouth?'
+			,'My ears are burning'
+			,'On the other side of the screen, it all looks so easy.'
+			,'/me is starting to hear things...'
+			,'/me thinks {from} talks too much.'
+			,'{from} has died of dysentery'
+			,'I find your lack of faith disturbing.'
+			,'/me is looking for a new job'
 		];
 
 		return zoidisms[Math.floor(Math.random() * zoidisms.length)].split('{from}').join(from);
+	}
+
+	function random8ball (from) {
+		var responses = [
+			'As I see it, yes.'
+		    , 'It is certain.'
+		    , 'It is decidedly so.'
+		    , 'Most likely.'
+		    , 'Outlook good.'
+		    , 'Signs point to yes.'
+		    , 'Without a doubt.'
+		    , 'Yes.'
+		    , 'Yes - definitely.'
+		    , 'You may rely on it.'
+		    , 'Reply hazy, try again.'
+		    , 'Ask again later.'
+		    , 'Better not tell you now.'
+		    , 'Cannot predict now.'
+		    , 'Concentrate and ask again.'
+		    , 'Don`t count on it.'
+		    , 'My reply is no.'
+		    , 'My sources say no.'
+		    , 'Outlook not so good.'
+		    , 'Very doubtful.'];
+
+		return responses[_.random(0, responses.length)].split('{from}').join(from);
 	}
 
 	function hush( from, text ) {

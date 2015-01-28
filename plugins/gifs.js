@@ -3,9 +3,14 @@
 module.exports = (function(){
 
 	return function init( bot ){
-		bot.on( 'message#', function( from, to, text ){
+		bot.on( 'message', function( from, to, text ){
 
 			if (bot.isChannelPaused(to)) return;
+
+			if (to === bot.botName) {
+			    //they are talking to us in a private message, set to to be from
+			    to = from;
+			}
 
 			if (text.indexOf('gif:') === 0 && text.length >= 5) {
 				gifme(text.substr(4), function(err, url){
