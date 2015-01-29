@@ -119,6 +119,22 @@ KSHHK
 
 Shut zoidbox up for some minutes, default 15. Also available as `zoidbox hush`
 
+
+
+### giphy:[phrase]
+
+Will query the Giphy API and return a random animated gif based on your provided phrase / keyword
+
+### #cfhour !latest
+
+Will return the latest show from the CFHour feed. The title and .mp3 link will be given.
+
+### #cfhour !poll
+
+Check for any new shows in the CFHour feed (http://feeds.feedburner.com/CfhourColdfusionPodcast). Zoidbox will check every 15 minutes, but if you can't wait that long you can request an immediate check with this command.
+
+
+
 ##Polling
 
 ### #poll -create "question text" -options ["Option A", "Option B", "Option C"]
@@ -162,15 +178,3 @@ Clears all votes previously placed.
 ### #poll -reset
 
 Clears the poll and votes.  You have to reset before you can create a new poll.
-
-### giphy:[phrase]
-
-Will query the Giphy API and return a random animated gif based on your provided phrase / keyword
-
-### #cfhour !latest
-
-Will return the latest show from the CFHour feed. The title and .mp3 link will be given.
-
-### #cfhour !poll
-
-Check for any new shows in the CFHour feed (http://feeds.feedburner.com/CfhourColdfusionPodcast). Zoidbox will check every 15 minutes, but if you can't wait that long you can request an immediate check with this command.
