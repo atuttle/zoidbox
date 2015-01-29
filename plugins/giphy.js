@@ -26,7 +26,7 @@ module.exports = (function(){
 
 	function randomGiphy(term, callback){
 		var request = require('request');
-		var url = 'http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=';
+		var url = 'http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&rating=pg&tag=';
 		request( url + term, function(err, result){
 			if( err ){
 				callback('Sorry, looks like there was a problem with the api... http://i.imgur.com/amCuffe.gif');
