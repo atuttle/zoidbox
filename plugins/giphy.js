@@ -12,8 +12,8 @@ module.exports = (function(){
 			    to = from;
 			}
 
-			if (text.indexOf('gif:') === 0 && text.length >= 5) {
-				randomGiphy(text.substr(4), function(err, url){
+			if (text.indexOf('giphy:') === 0 && text.length >= 5) {
+				randomGiphy(text.substr(6), function(err, url){
 					if (err){
 						bot.say(to, err);
 					}else{

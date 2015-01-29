@@ -35,7 +35,7 @@ module.exports = (function(){
 					checkForShows( true );
 					bot.say( to, 'Good to go, ' + from );
 				});
-			} else if ( text === '#cfhour !latest' || '#cfhour' ){
+			} else if ( text === '#cfhour !latest' ){
 				fetchLatestWaffle();
 			}
 		});
@@ -51,8 +51,8 @@ module.exports = (function(){
 			function callback (error, meta, articles){
 				if (!error) {
 					var selectedShow = articles[0];
-					bot.say( '#zoidbox', 'Waffle alert! Latest CFHour Show: ' + selectedShow.title + ' ~ ' + selectedShow.link );
-					bot.say( '##coldfusion', 'Waffle alert! Latest CFHour Show: ' + selectedShow.title + ' ~ ' + selectedShow.link );
+					bot.say( '#zoidbox', 'Waffle alert! Latest CFHour Show: ' + selectedShow.title + ' ~ ' + selectedShow.enclosures[0].url );
+					bot.say( '##coldfusion', 'Waffle alert! Latest CFHour Show: ' + selectedShow.title + ' ~ ' + selectedShow.enclosures[0].url );
 				} else {
 					console.error(error);
 				}

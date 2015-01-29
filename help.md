@@ -165,16 +165,11 @@ Clears the poll and votes.  You have to reset before you can create a new poll.
 
 ### giphy:[phrase]
 
-Will query the Giphy API and retun a random animated gif based on your provided phrase / keyword
-
-
-### #cfhour
-
-Will return the latest show from the CFHour feed. The title and .mp3 link will be given.
+Will query the Giphy API and return a random animated gif based on your provided phrase / keyword
 
 ### #cfhour !latest
 
-The same as above but for those who enjoy typing that little bit more.
+Will return the latest show from the CFHour feed. The title and .mp3 link will be given.
 
 ### #cfhour !poll
 
