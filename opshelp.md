@@ -83,3 +83,8 @@ Will block all input and output in the current room from the bot until an #unpau
 ### #unpause botname or #play botname
 
 Will resume bot activities in the current room
+
+
+### #cfhour !init
+
+Only useful to prevent chat flooding if the Redis store has been lost. With an empty Redis store, all shows appear to be new, so it will notify about each one individually. If you wait until zoidbox joins the channel and then run this command, zoidbox will cache all visible showRefs without sending any messages to chat for any of them.
