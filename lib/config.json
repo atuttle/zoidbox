@@ -1,5 +1,5 @@
 {
-	 "channels": [ "##coldfusion", "#zoidbox" ]
+	"channels": [ "##coldfusion", "#zoidbox" ]
 	,"testingChannel": "#zoidbox"
 	,"server": "irc.freenode.net"
 	,"botName": "zoidbox"
