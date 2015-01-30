@@ -51,8 +51,8 @@ module.exports = (function(){
 			function callback (error, meta, articles){
 				if (!error) {
 					var selectedShow = articles[0];
-					bot.say( '#zoidbox', 'Waffle alert! Latest CFHour Show: ' + selectedShow.title + ' ~ ' + selectedShow.enclosures[0].url );
-					bot.say( '##coldfusion', 'Waffle alert! Latest CFHour Show: ' + selectedShow.title + ' ~ ' + selectedShow.enclosures[0].url );
+					bot.say( '#zoidbox', 'Waffle alert! Latest CFHour Show: ' + selectedShow.title + ' ~ ' + selectedShow.enclosures[0].url + ' ~ http://cfhour.com' );
+					bot.say( '##coldfusion', 'Waffle alert! Latest CFHour Show: ' + selectedShow.title + ' ~ ' + selectedShow.enclosures[0].url + ' ~ http://cfhour.com' );
 				} else {
 					console.error(error);
 				}
@@ -102,8 +102,8 @@ module.exports = (function(){
 			}
 			if ( data === 0 ){ //haven't posted about this one yet, share it
 				if ( !quietly ){
-					bot.say( '#zoidbox', 'Waffle alert! NEW CFHour Show: ' + title + ' ~ ' + link );
-					bot.say( '##coldfusion', 'Waffle alert! NEW CFHour Show: ' + title + ' ~ ' + link );
+					bot.say( '#zoidbox', 'Waffle alert! NEW CFHour Show: ' + title + ' ~ ' + link + ' ~ http://cfhour.com' );
+					bot.say( '##coldfusion', 'Waffle alert! NEW CFHour Show: ' + title + ' ~ ' + link + ' ~ http://cfhour.com' );
 				}
 				bot.redis.sadd( 'cfhour.seen', showRef );
 			}else{
