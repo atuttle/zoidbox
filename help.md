@@ -111,6 +111,10 @@ Check for any new bugs in the ColdFusion bugbase (https://bugbase.adobe.com). Zo
 
 Check for any new bugs in the lucee bitbucket issues list.  Zoidbox will check every 15 minutes, but if you can't wait that long you can request an immediate check with this command.
 
+### #lucee {issueID}
+
+Get the current status, information and link for a given issueID.
+
 ### end your message with a space and the word over
 
 KSHHK
