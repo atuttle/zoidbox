@@ -38,7 +38,7 @@ module.exports = (function(){
 
                     default :
                         if (!isNaN(_.parseInt(parts[1].trim()))) {
-                            getIssue(parts[1].trim());
+                            getIssue(to, parts[1].trim());
                         }
                         break;
                 }
@@ -74,13 +74,13 @@ module.exports = (function(){
         });
     }
 
-    function getIssue (issueID) {
+    function getIssue (channel, issueID) {
         var url = issueApiURL.replace('{issueID}', issueID);
         request(url, function (err, response, body) {
             if (!err && response.statusCode === 200) {
                 try {
                     var issue = JSON.parse(body);
-                    showMessage(issue.local_id, issue.title, issue.metadata.kind, issue.priority, issue.status);
+                    return  bot.say(channel, formatMessage(issue.local_id, issue.title, issue.metadata.kind, issue.priority, issue.status));
                 } catch (e) {
                     console.error('Error parsing JSON response from ' + openIssuesApiURL);
                     return bot.say(bot.testingChannel, 'There was a problem parsing the lucee issues JSON response: ' + url);
@@ -99,7 +99,13 @@ module.exports = (function(){
             if (err) return bot.say(bot.testingChannel, 'lucee issues plugin error ~ checking lucee_issues.seen: ' + err);
             if (data === 0) {
                 if (!quietly) {
-                    showMessage(issueID, title, issueType, priority, status);
+                    var message = formatMessage(issueID, title, issueType, priority, status);
+                    bot.say(bot.testingChannel, message);
+                    _.each(bot.channels, function(channel){
+                        if (channel !== bot.testingChannel) {
+                            bot.say(channel, message);
+                        }
+                    });
                 }
                 redis.sadd('lucee_issues.seen', issueID);
             } else {
@@ -108,14 +114,9 @@ module.exports = (function(){
         });
     }
 
-    function showMessage(issueID, title, issueType, priority, status) {
-        var message = 'LUCEE ISSUE: ' + _.capitalize(status) + ' `' + _.capitalize(priority) + '` ' + _.capitalize(issueType) + ': ' + title + ' ~ ' + 'https://bitbucket.org/lucee/lucee/issue/' + issueID.toString();
-        bot.say(bot.testingChannel, message);
-        _.each(bot.channels, function(channel){
-            if (channel !== bot.testingChannel) {
-                bot.say(channel, message);
-            }
-        });
+    function formatMessage(issueID, title, issueType, priority, status) {
+        return 'LUCEE ISSUE: ' + _.capitalize(status) + ' `' + _.capitalize(priority) + '` ' + _.capitalize(issueType) + ': ' + title + ' ~ ' + 'https://bitbucket.org/lucee/lucee/issue/' + issueID.toString();
+
     }
 
 })();
