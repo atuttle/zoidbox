@@ -107,6 +107,10 @@ show the top 10 searched for queries against cfdocs
 
 Check for any new bugs in the ColdFusion bugbase (https://bugbase.adobe.com). Zoidbox will check every 15 minutes, but if you can't wait that long you can request an immediate check with this command.
 
+### #luceebugs !poll
+
+Check for any new bugs in the lucee bitbucket issues list.  Zoidbox will check every 15 minutes, but if you can't wait that long you can request an immediate check with this command.
+
 ### end your message with a space and the word over
 
 KSHHK

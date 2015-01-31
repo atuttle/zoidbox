@@ -14,6 +14,7 @@
 	var bot = initIRC( conf );
 
 	//initialize
+	bot.setMaxListeners(15);
 	bot.use( require('./lib/core') );
 	bot.use( require('./lib/ops') );
 	bot.loadPlugins();
@@ -40,6 +41,7 @@
 		b.conf = conf;
         b.botName = conf.get('botName');
 		b.testingChannel = conf.get('testingChannel');
+		b.channels = conf.get('channels');
 
 		b.use = function use( plugin ){
 			plugin( bot );
