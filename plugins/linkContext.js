@@ -16,11 +16,11 @@ module.exports = (function(){
 			    to = from;
 			}
 
-            var results = /https:\/\/bitbucket.org\/\w*\/\w*\/issue\/\d*\/?[\w-]*/g.exec(text);
+            var results = /https:\/\/bitbucket.org\/[\w-]*\/[\w-]*\/issue\/\d*\/?[\w-]*/g.exec(text);
             if (!_.isNull(results) && results.length) {
                 return getInfoForBitbucketIssue(to, results[0]);
             }
-            results = /https:\/\/github.com\/\w*\/\w*\/issues\/\d*\/?[\w-]*/g.exec(text);
+            results = /https:\/\/github.com\/[\w-]*\/[\w-]*\/issues\/\d*\/?[\w-]*/g.exec(text);
             if (!_.isNull(results) && results.length) {
                 return getInfoForGithubIssue(to, results[0]);
             }
