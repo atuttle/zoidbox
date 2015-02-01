@@ -43,7 +43,6 @@ module.exports = (function(){
                         break;
                 }
             }
-
         });
 
         setInterval(checkForIssues, frequency);
@@ -55,7 +54,10 @@ module.exports = (function(){
         bot.log('Checking for latest lucee issues');
 
         request(openIssuesApiURL, function(err, response, body) {
-            if (!err && response.statusCode === 200) {
+            if (err) {
+                console.error(err);
+                return bot.say(bot.testingChannel, 'There was a problem with the request for lucee issues: ' + err + '; apiURL: '+ openIssuesApiURL);
+            } else if (response.statusCode === 200) {
                 try {
                     var data = JSON.parse(body);
 
@@ -67,9 +69,8 @@ module.exports = (function(){
                     console.error('Error parsing JSON response from ' + openIssuesApiURL);
                     return bot.say(bot.testingChannel, 'There was a problem parsing the lucee issues JSON response: ' + openIssuesApiURL);
                 }
-            } else {
-                console.error(err);
-                return bot.say(bot.testingChannel, 'There was a problem with the request for lucee issues: ' + err + '; apiURL: '+ openIssuesApiURL);
+            } else if (response.statusCode === 404) {
+                return bot.say(bot.testingChannel, 'Could not find lucee issue list: '+ openIssuesApiURL);
             }
         });
     }
@@ -77,17 +78,19 @@ module.exports = (function(){
     function getIssue (channel, issueID) {
         var url = issueApiURL.replace('{issueID}', issueID);
         request(url, function (err, response, body) {
-            if (!err && response.statusCode === 200) {
+            if (err) {
+                console.error(err);
+                return bot.say(channel, 'There was a problem with the request for lucee issue: ' + err + '; apiURL: '+ url);
+            } else if (response.statusCode === 200) {
                 try {
                     var issue = JSON.parse(body);
                     return  bot.say(channel, formatMessage(issue.local_id, issue.title, issue.metadata.kind, issue.priority, issue.status));
                 } catch (e) {
-                    console.error('Error parsing JSON response from ' + openIssuesApiURL);
-                    return bot.say(bot.testingChannel, 'There was a problem parsing the lucee issues JSON response: ' + url);
+                    console.error('Error parsing JSON response from ' + url);
+                    return bot.say(channel, 'There was a problem parsing the lucee issues JSON response: ' + url);
                 }
-            } else {
-                console.error(err);
-                return bot.say(bot.testingChannel, 'There was a problem with the request for lucee issue: ' + err + '; apiURL: '+ url);
+            } else if (response.statusCode === 404) {
+                return bot.say(channel, 'Could not find lucee issue: '+ url);
             }
         });
     }
@@ -114,9 +117,15 @@ module.exports = (function(){
         });
     }
 
-    function formatMessage(issueID, title, issueType, priority, status) {
-        return 'LUCEE ISSUE: ' + _.capitalize(status) + ' `' + _.capitalize(priority) + '` ' + _.capitalize(issueType) + ': ' + title + ' ~ ' + 'https://bitbucket.org/lucee/lucee/issue/' + issueID.toString();
-
+    function formatMessage(issueID, title, issueType, priority, status, includeLink) {
+        if (_.isUndefined(includeLink)) {
+            includeLink = true;
+        }
+        var message = 'LUCEE ISSUE: ' + _.capitalize(status) + ' `' + _.capitalize(priority) + '` ' + _.capitalize(issueType) + ': ' + title;
+        if (includeLink) {
+            message += ' ~ https://bitbucket.org/lucee/lucee/issue/' + issueID.toString();
+        }
+        return message;
     }
 
 })();

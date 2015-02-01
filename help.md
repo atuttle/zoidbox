@@ -141,7 +141,9 @@ Will return the latest show from the CFHour feed. The title and .mp3 link will b
 
 Check for any new shows in the CFHour feed (http://feeds.feedburner.com/CfhourColdfusionPodcast). Zoidbox will check every 15 minutes, but if you can't wait that long you can request an immediate check with this command.
 
+### bitbucket or github issue url
 
+If you mention a bitbucket or github issue url, zoidbox will respond with some information about the issue.
 
 ##Polling
 
