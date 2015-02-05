@@ -13,13 +13,18 @@ module.exports = (function(){
 			}
 
 			if (text.indexOf('giphy:') === 0 && text.length >= 5) {
-				randomGiphy(text.substr(6), function(err, url){
-					if (err){
-						bot.say(to, err);
-					}else{
-						bot.say(to, url);
-					}
-				});
+				var term = text.substr(6);
+				if(term === 'reacharound' || 'reachie' || 'reach-around') {
+					bot.say(to, 'http://ugcserver.com/betsie.gif');
+				} else {
+					randomGiphy(text.substr(6), function(err, url){
+						if (err){
+							bot.say(to, err);
+						}else{
+							bot.say(to, url);
+						}
+					});
+				}
 			}
 		});
 	};
