@@ -18,11 +18,19 @@ List users that have at least one pounce waiting for them.
 
 ### #lastseen
 
-tells you the last people to leave.
+tells you the last people to have any activity.
 
 ### #lastseen nick
 
 tells you when `nick` was last seen.
+
+### #lastleave
+
+tells you the last people to leave.
+
+### #lastleave nick
+
+tells you when `nick` last quit or parted the channel.
 
 ### +1 nick or nick: +1
 
@@ -144,6 +152,22 @@ Check for any new shows in the CFHour feed (http://feeds.feedburner.com/CfhourCo
 ### bitbucket or github issue url
 
 If you mention a bitbucket or github issue url, zoidbox will respond with some information about the issue.
+
+### #maxHistoryPerChannel
+
+The maximum number of log entries stored in the bot per channel.
+
+### #taillen {channel}
+
+The number of log entries currently stored in the channel.  channel is optional, if omitted it uses the current channel.
+
+### #tail !missed {channel}
+
+A gist of the messages sent to the channel since the last time you left. channel is optional, if omitted it uses the current channel.
+
+### #tail {channel} lines.
+
+A gist of the last messages sent to the channel. channel is optional, if omitted it uses the current channel.
 
 ##Polling
 
