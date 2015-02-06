@@ -33,11 +33,13 @@ module.exports = (function(){
 	};
 
 	function c2f( c ){
-		return Math.round( c * 9 / 5 + 32 );
+		var result = Math.round( c * 9 / 5 + 32 );
+		return (result <= -20) ? "FUCKING COLD" : result;
 	}
 
 	function f2c( f ){
-		return Math.round( (f - 32) * 5 / 9 );
+		var result = Math.round( (f - 32) * 5 / 9 );
+		return (result <= -29) ? "FOOKING COLD, EH? " : result;
 	}
 
 })();
