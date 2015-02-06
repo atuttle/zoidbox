@@ -14,6 +14,7 @@ module.exports = (function(){
 				 to = from;
 			}
 
+			text = ' ' + text + ' '; //because this is easier than figuring out some bizarre regex thing
 			var matches = text.match(pattern);
 			if (matches !== null) {
 				var sign = matches[1];
