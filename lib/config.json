@@ -9,4 +9,5 @@
 	,"ops": [ "ryanguill", "fusiongrokker" ]
 	,"debug": true
 	,"karmaCooldown": 0
+    ,"maxHistoryPerChannel": 7500
 }

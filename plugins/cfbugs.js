@@ -46,7 +46,7 @@ module.exports = (function(){
 			}else if ( text === '#cfbugs !init' ){
 				bot.ops.isOp( message.user, function( err, data ){
 					if ( err ){
-						return bot.say( to, 'Error determinging your OPS status. Oops.');
+						return bot.say( to, 'Error determining your OPS status. Oops.');
 					}
 					if ( data === 0 ){
 						return bot.say( to, 'You must be an op to do that, ' + from );

@@ -34,7 +34,7 @@ module.exports = (function(){
 	});
 
 	emit.on('lastseen', function(from, to, text) {
-		var nick = text.replace('#lastseen', '').trim();
+		var nick = text.replace('#lastseen', '').trim().toLowerCase();
 
 		if (nick.length) {
 			redis.hget(bot.botName + '.' + to + '.lastseen', nick, function(err, data) {
@@ -47,6 +47,31 @@ module.exports = (function(){
 			});
 		} else {
 			redis.hgetall(bot.botName + '.' + to + '.lastseen', function(err, data){
+				log(data);
+				if (data !== null) {
+					var people = _.map(_.sortBy(_.map(data, function(item, key) { return [key, item];}), 1).reverse().slice(0, 10), function(item) {return item[0];}).join(', ');
+					bot.say(to, 'The last users with activity were: ' + people);
+				} else {
+					bot.say(to, 'I haven\'t seen anyone all day.');
+				}
+			});
+		}
+	});
+
+	emit.on('lastleave', function(from, to, text) {
+		var nick = text.replace('#lastleave', '').trim().toLowerCase();
+
+		if (nick.length) {
+			redis.hget(bot.botName + '.' + to + '.lastleave', nick, function(err, data) {
+				if (data !== null) {
+					var date = new Date(parseInt(data, 10));
+					bot.say(to, 'I last saw ' + nick + ' leave around ' + date.toLocaleString());
+				} else {
+					bot.say(to, 'who? ' + nick + '? Never heard of them.');
+				}
+			});
+		} else {
+			redis.hgetall(bot.botName + '.' + to + '.lastleave', function(err, data){
 				log(data);
 				if (data !== null) {
 					var people = _.map(_.sortBy(_.map(data, function(item, key) { return [key, item];}), 1).reverse().slice(0, 10), function(item) {return item[0];}).join(', ');
@@ -159,6 +184,10 @@ module.exports = (function(){
 
 	function setLastSeen (channel, nick) {
 		redis.hset(bot.botName + '.' + channel + '.lastseen', nick.toLowerCase(), Date.now());
+	}
+
+	function setLastLeave (channel, nick) {
+		redis.hset(bot.botName + '.' + channel + '.lastleave', nick.toLowerCase(), Date.now());
 	}
 
 	function setCurrentlyOnline(channel, nick, isOnline) {
@@ -276,6 +305,7 @@ module.exports = (function(){
 		bot.addListener('part', function(channel, nick, reason) {
 			log('part', channel, nick, reason);
 			setLastSeen(channel, nick);
+            setLastLeave(channel, nick);
 			setCurrentlyOnline(channel, nick, false);
 		});
 
@@ -283,6 +313,7 @@ module.exports = (function(){
 			log('quit', channels, nick, reason);
             _.each(channels, function(channel) {
                 setLastSeen(channel, nick);
+                setLastLeave(channel, nick);
                 setCurrentlyOnline(channel, nick, false);
             });
 		});
@@ -327,7 +358,9 @@ module.exports = (function(){
 
 			if (text.indexOf('#lastseen') === 0) {
 				emit.emit('lastseen', from, to, text);
-			} else if (text.indexOf('#stats') === 0) {
+			} else if (text.indexOf('#lastleave') === 0) {
+                emit.emit('lastleave', from, to, text);
+            } else if (text.indexOf('#stats') === 0) {
 				emit.emit('stats', from, to, text);
 			} else if (text.indexOf('#random') === 0) {
 				emit.emit('random', from, to, text);

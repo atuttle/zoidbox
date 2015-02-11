@@ -82,6 +82,7 @@ module.exports = (function(){
 			,'{from} has died of dysentery'
 			,'I find your lack of faith disturbing.'
 			,'/me is looking for a new job'
+			,'The `Ol Sourcerer is at it again'
 		];
 
 		return zoidisms[Math.floor(Math.random() * zoidisms.length)].split('{from}').join(from);
