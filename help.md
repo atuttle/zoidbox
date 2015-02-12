@@ -32,7 +32,7 @@ tells you the last people to leave.
 
 tells you when `nick` last quit or parted the channel.
 
-### +1 nick or nick: +1
+### +1 nick or nick: +1 or nick++
 
 gives karma to `nick`
 
