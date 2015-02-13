@@ -153,11 +153,11 @@ Check for any new shows in the CFHour feed (http://feeds.feedburner.com/CfhourCo
 
 If you mention a bitbucket or github issue url, zoidbox will respond with some information about the issue.
 
-### #maxHistoryPerChannel
+### #tail !max
 
 The maximum number of log entries stored in the bot per channel.
 
-### #taillen {channel}
+### #tail !len {channel}
 
 The number of log entries currently stored in the channel.  channel is optional, if omitted it uses the current channel.
 

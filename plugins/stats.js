@@ -344,12 +344,19 @@ module.exports = (function(){
             });
 		});
 
-		bot.addListener('message', function( from, to, text){
+   		bot.addListener('ctcp', function( from, to, command, text, message) {
+            setLastSeen(to, from);
+            if (command.indexOf('ACTION') === 0) {
+                countMessage(to, from, '* ' + message.nick + ' ' + command.replace('ACTION', '').trim());
+            }
+        });
 
-			if (bot.isChannelPaused(to)) return;
+		bot.addListener('message', function( from, to, text){
 
 			setLastSeen(to, from);
 			countMessage(to, from, text);
+
+            if (bot.isChannelPaused(to)) return;
 
 			if (to === bot.botName) {
 				//they are talking to us in a private message, set to to be from
