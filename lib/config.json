@@ -1,5 +1,6 @@
 {
-	 "channels": [ "##coldfusion", "#zoidbox" ]
+	"channels": [ "##coldfusion", "#zoidbox" ]
+	,"testingChannel": "#zoidbox"
 	,"server": "irc.freenode.net"
 	,"botName": "zoidbox"
 	,"redis_port": 6379
@@ -7,5 +8,6 @@
 	,"redis_auth_pass": ""
 	,"ops": [ "ryanguill", "fusiongrokker" ]
 	,"debug": true
-	,"karmaCooldown": 60
+	,"karmaCooldown": 0
+    ,"maxHistoryPerChannel": 7500
 }
