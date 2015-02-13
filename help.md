@@ -32,9 +32,25 @@ tells you the last people to leave.
 
 tells you when `nick` last quit or parted the channel.
 
-### +1 nick or nick: +1 or nick++
+### nick++ 
 
-gives karma to `nick`
+gives karma to `nick`.
+formats to give karma are as follows:
+```
+++nick
+++ nick
+nick++
+nick ++
+nick +1
+nick+1
+nick, +1
+nick,+1
+nick: +1
+nick:+1
++1nick
++1 nick
+```
+
 
 ### #karma
 

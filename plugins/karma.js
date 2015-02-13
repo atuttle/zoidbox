@@ -13,20 +13,9 @@ module.exports = (function(){
 		log,
 		conf;
 
-	emit.on('addKarmaSucceeding', function(from, to, text) {
-		var nick = text.replace(/[:,]\s*\+1/g, '').trim();
-		addKarma(nick, from, to, text);
-	});
-
-	emit.on('addKarmaPreceding', function(from, to, text) {
-		var nick = text.replace(/\+1[:,]*/g, '').trim().split(' ');
-		addKarma(nick[0], from, to, text);
-	});
-
-	emit.on('addKarmaPlusPlus', function(from, to, text) {
-		var nick = text.replace(/\+\+/g, '').trim().split(' ');
-		addKarma(nick[0], from, to, text);
-	});
+	emit.on( 'bumpKarma', function ( nick, from, to, text ) {
+		addKarma( nick, from, to, text );
+	} );
 
 	emit.on('karma', function(from, to, text, message){
 		var nick = text.replace('#karma', '').trim();
@@ -157,6 +146,59 @@ module.exports = (function(){
 		}
 	});
 
+	function parseNick ( input ) {
+		var tokens, token, i;
+		var t = {
+			nick: null,
+			colon: null,
+			comma: null,
+			space: null,
+			plusplus: null,
+			plusone: null
+		};
+		var match = {
+			colon: ':',
+			comma: ',',
+			space: ' ',
+			plusplus: '++',
+			plusone: '+1'
+		};
+		var m, k, out = '';
+		var E;
+
+		if ( !input || input.split( ' ' ).length > 3 || input[ 0 ] == ' ' || input[ input.length - 1 ] == ' ') {
+			return null;
+		}
+
+		for ( m in match ) {
+			if ( match.hasOwnProperty( m ) ) {
+				k = match[ m ];
+				if ( input.indexOf( match[ m ] ) > -1 ) {
+					t[ m ] = k;
+					input = input.replace( k, '' );
+				} else if ( m.indexOf( 'plus' ) == -1 ) {
+					if ( input.search( k ) > -1 ) {
+						t[ m ] = input.match( k );
+						input = input.replace( k, '' );
+					}
+				}
+			}
+		}
+		t.nick = input;
+
+		/* members of t are null or string */
+		if ( ( t.plusplus ? 1 : 0 ) ^ ( t.plusone ? 1 : 0 ) ) {
+			for( token in t ) {
+				if ( t.hasOwnProperty( token ) && t[ token ] ) {
+					out += t[ token ];
+				}
+			}
+			return t.nick;
+		} else {
+			return null;
+		}
+	}
+
 	function incrKarma(channel, nick, giver, incrby) {
 		redis.hincrby(conf.get('botName') + '.' + channel + '.karma', nick.toLowerCase(), incrby);
 		redis.hincrby(conf.get('botName') + '.' + channel + '.karma_giver', giver.toLowerCase(), incrby);
@@ -277,53 +319,48 @@ module.exports = (function(){
 		if (nick.toLowerCase() === from.toLowerCase()) {
 			bot.say(to, 'You can\'t give karma to yourself ಠ_ಠ');
 		} else {
-			if (!bot.isCurrentlyOnline(to, nick)) {
-				//dont reply if no match or users is not currently online.
-				//bot.say(to, 'who is ' + nick + '?');
-			} else {
-                isBannedFromKarma(to, nick, function(err, data) {
-                    if (data) {
-                        bot.say(to, nick + ' is banned from receiving karma in ' + to);
-                    } else {
-                        getLastKarmaGive(to, from, function (err, data) {
-                            if (Date.now() - data > conf.get('karmaCooldown') * 1000) {
-                                incrKarma(to, nick, from, 1);
-	                            getLeaderboard(to, function(err, data){
+            isBannedFromKarma(to, nick, function(err, data) {
+                if (data) {
+                    bot.say(to, nick + ' is banned from receiving karma in ' + to);
+                } else {
+                    getLastKarmaGive(to, from, function (err, data) {
+                        if (Date.now() - data > conf.get('karmaCooldown') * 1000) {
+                            incrKarma(to, nick, from, 1);
+                            getLeaderboard(to, function(err, data){
 
-									var leaders = _.map(
-													_.sortBy(
-														_.filter(
-															_.map(data, function(item, key) {
-																return [key, item];
-															})
-														, function(item) {
-															return _.parseInt(item[1], 10) > 0;
+								var leaders = _.map(
+												_.sortBy(
+													_.filter(
+														_.map(data, function(item, key) {
+															return [key, item];
 														})
-													, function(value){
-														return _.parseInt(value[1], 10);
+													, function(item) {
+														return _.parseInt(item[1], 10) > 0;
 													})
-													.reverse()
-												, function (item, index) {
-													return [item[0], item[1], index + 1];
-												});
+												, function(value){
+													return _.parseInt(value[1], 10);
+												})
+												.reverse()
+											, function (item, index) {
+												return [item[0], item[1], index + 1];
+											});
 
-		                            var place = _.first(_.filter(leaders, function(item) {return item[0] === nick.toLowerCase();}));
+	                            var place = _.first(_.filter(leaders, function(item) {return item[0] === nick.toLowerCase();}));
 
-		                            if (_.isUndefined(place)) {
-			                            log('addKarma: place undefined', place, leaders, nick);
-			                            place = [nick, 0, 0];
-		                            }
+	                            if (_.isUndefined(place)) {
+		                            log('addKarma: place undefined', place, leaders, nick);
+		                            place = [nick, 0, 0];
+	                            }
 
-									bot.say(to, from + ' gives karma to ' + nick + '. They now have ' + place[1] + ' karma, #' + place[2] + ' in ' + to);
-								});
+								bot.say(to, from + ' gives karma to ' + nick + '. They now have ' + place[1] + ' karma, #' + place[2] + ' in ' + to);
+							});
 
-                            } else {
-                                bot.say(to, 'easy ' + from + '.');
-                            }
-                        });
-                    }
-                });
-			}
+                        } else {
+                            bot.say(to, 'easy ' + from + '.');
+                        }
+                    });
+                }
+            });
 		}
 	}
 
@@ -332,7 +369,6 @@ module.exports = (function(){
 		log = bot.log;
 		conf = bot.conf;
 		redis = bot.redis;
-
 
 		bot.on( 'message', function (from, to, text, message){
 
@@ -343,17 +379,17 @@ module.exports = (function(){
 			    to = from;
 			}
 
-			if (text.search(/[:,]\s*\+1/g) !== -1) {
-				emit.emit('addKarmaSucceeding', from, to, text);
-			} else if (text.search(/^\+1[:,\s]*[\w\[\]]/g) !== -1) {
-				emit.emit('addKarmaPreceding', from, to, text);
-            } else if (text.search(/^\w*\+\+/g) !== -1) {
-				emit.emit('addKarmaPlusPlus', from, to, text);
-			} else if (text.indexOf('#karmagivers') === 0) {
-				emit.emit('karmaGivers', from, to, text, message);
-			} else if (text.indexOf('#karma') === 0) {
-				emit.emit('karma', from, to, text, message);
+			if ( text.indexOf( '#karmagivers' ) === 0 ) {
+				emit.emit( 'karmaGivers', from, to, text, message );
+			} else if ( text.indexOf( '#karma' ) === 0 ) {
+				emit.emit( 'karma', from, to, text, message );
+			} else {
+				var nick = parseNick( text );
+				if ( nick && bot.isCurrentlyOnline( to, nick ) ) {
+					emit.emit( 'bumpKarma', nick, from, to, text );
+				}
 			}
+
 		});
 	};
 
