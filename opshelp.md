@@ -32,6 +32,14 @@ restores karma privileges
 
 shows who is banned from karma in the current channel
 
+### #karma !all
+
+will show you the karma leaderboard from all of the rooms the bot is currently in - can only be used from #zoidbox
+
+### #karmagivers !all
+
+will show you the karmagivers leaderboard from all of the rooms the bot is currently in - can only be used from #zoidbox
+
 ### #karmagivers !reset nick
 
 reset a karma giver's stats
@@ -52,6 +60,10 @@ will show you stats from all of the rooms the bot is currently in - can only be 
 
 Only useful to prevent chat flooding if the Redis store has been lost. With an empty Redis store, all bugs appear to be new, so it will notify about each one individually. If you wait until zoidbox joins the channel and then run this command, zoidbox will cache all visible bugId's without sending any messages to chat for any of them.
 
+### #luceebugs !init
+
+Only useful to prevent chat flooding if the Redis store has been lost. With an empty Redis store, all bugs appear to be new, so it will notify about each one individually. If you wait until zoidbox joins the channel and then run this command, zoidbox will cache all visible bugId's without sending any messages to chat for any of them.
+
 ### #pounces !clear
 
 clear all pending pounces
@@ -59,3 +71,24 @@ clear all pending pounces
 ### #cooldowns !clear
 
 clear all cooldowns
+
+### !{anything} !desc newDescription
+
+Override or set the description for anything.  Does not have to be an actual tag or function
+
+### !{anything} !desc !clear
+
+Clears the custom description
+
+### #pause botname
+
+Will block all input and output in the current room from the bot until an #unpause is issued by an op
+
+### #unpause botname or #play botname
+
+Will resume bot activities in the current room
+
+
+### #cfhour !init
+
+Only useful to prevent chat flooding if the Redis store has been lost. With an empty Redis store, all shows appear to be new, so it will notify about each one individually. If you wait until zoidbox joins the channel and then run this command, zoidbox will cache all visible showRefs without sending any messages to chat for any of them.

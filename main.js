@@ -4,20 +4,28 @@
 	var conf = require('nconf')
 		.argv()
 		.env()
-		.file({file: './lib/config.json'})
+		.file({file: getConfigFile()})
 		.defaults({
 			'karmaCooldown': 60
 			,'botName': '```zoidbox'
+			,'testingChannel': '#zoidbox'
 		});
 
 	var bot = initIRC( conf );
 
 	//initialize
+	bot.setMaxListeners(20);
 	bot.use( require('./lib/core') );
 	bot.use( require('./lib/ops') );
 	bot.loadPlugins();
 
 	//=====================================================
+
+	function getConfigFile(){
+		var override = './lib/config.user.json'
+			,def = './lib/config.json';
+		return require('fs').existsSync(override) ? override : def;
+	}
 
 	function initIRC( conf ){
 		var irc = require( 'irc' );
@@ -31,7 +39,9 @@
 		);
 
 		b.conf = conf;
-        b.botName = conf.get('botName')
+        b.botName = conf.get('botName');
+		b.testingChannel = conf.get('testingChannel');
+		b.channels = conf.get('channels');
 
 		b.use = function use( plugin ){
 			plugin( bot );
