@@ -101,7 +101,7 @@ module.exports = (function(){
                                             }
                                             try {
                                                 var data = JSON.parse(body);
-                                                bot.say(to, 'messages in ' + channel + ' since ' + lastSeenDateString.toLocaleString() + ': ' + data.html_url);
+                                                bot.say(to, from + ': Log of messages in ' + channel + ' since ' + lastSeenDateString.toLocaleString() + ': ' + data.html_url);
                                             } catch (e) {
                                                 console.error(e);
                                             }

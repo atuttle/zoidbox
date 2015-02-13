@@ -2,6 +2,8 @@
 
 module.exports = (function(){
 
+	var _ = require( 'lodash' );
+
 	return function init( bot ){
 		bot.on( 'message', function( from, to, text ){
 
@@ -13,13 +15,18 @@ module.exports = (function(){
 			}
 
 			if (text.indexOf('giphy:') === 0 && text.length >= 5) {
-				randomGiphy(text.substr(6), function(err, url){
-					if (err){
-						bot.say(to, err);
-					}else{
-						bot.say(to, url);
-					}
-				});
+				var term = text.substr(6);
+				if(_.contains(['reacharound', 'reachie', 'reach-around'], term)) {
+					bot.say(to, 'http://ugcserver.com/betsie.gif');
+				} else {
+					randomGiphy(text.substr(6), function(err, url){
+						if (err){
+							bot.say(to, err);
+						}else{
+							bot.say(to, url);
+						}
+					});
+				}
 			}
 		});
 	};

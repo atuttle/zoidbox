@@ -2,7 +2,7 @@
 
 module.exports = (function(){
 
-	var pattern = /\b(\d+)(f|c)\b/i;
+	var pattern = /\s(\-?)(\d+)(f|c)\s/i;
 
 	return function init( bot ){
 		bot.on( 'message', function( from, to, text ){
@@ -14,25 +14,32 @@ module.exports = (function(){
 				 to = from;
 			}
 
+			text = ' ' + text + ' '; //because this is easier than figuring out some bizarre regex thing
 			var matches = text.match(pattern);
 			if (matches !== null) {
-				var currentUnit = matches[2];
-				var currentVal = matches[1];
+				var sign = matches[1];
+				var currentVal = matches[2];
+				var currentUnit = matches[3];
+				if (sign === '-'){
+					currentVal = -1 * currentVal;
+				}
 				if (currentUnit.toLowerCase() === 'f'){
-					bot.say(to, 'BTW, ' + matches[1] + 'ºF is ~' + f2c( currentVal ) + 'ºC');
+					bot.say(to, 'BTW, ' + currentVal + 'ºF is ~' + f2c( currentVal ) + 'ºC');
 				}else{
-					bot.say(to, 'BTW, ' + matches[1] + 'ºC is ~' + c2f( currentVal ) + 'ºF');
+					bot.say(to, 'BTW, ' + currentVal + 'ºC is ~' + c2f( currentVal ) + 'ºF');
 				}
 			}
 		});
 	};
 
 	function c2f( c ){
-		return Math.round( c * 9 / 5 + 32 );
+		var result = Math.round( c * 9 / 5 + 32 );
+		return (result <= -20) ? "FUCKING COLD: " + result : result;
 	}
 
 	function f2c( f ){
-		return Math.round( (f - 32) * 5 / 9 );
+		var result = Math.round( (f - 32) * 5 / 9 );
+		return (result <= -29) ? "FOOKING COLD, EH? " + result : result;
 	}
 
 })();
