@@ -202,14 +202,16 @@ module.exports = (function(){
     }
 
     function logMessage (channel, nick, user, text) {
-        var data = {
-            nick: nick,
-            user: user,
-            text: text,
-            time: new Date().getTime()
-        };
-        redis.lpush('channel_log.' + channel, JSON.stringify(data));
-        redis.ltrim('channel_log.' + channel, 0, maxHistoryPerChannel);
+        if (channel.indexOf('#') === 0) { //only log actual channels, not private messages
+            var data = {
+                nick: nick,
+                user: user,
+                text: text,
+                time: new Date().getTime()
+            };
+            redis.lpush('channel_log.' + channel, JSON.stringify(data));
+            redis.ltrim('channel_log.' + channel, 0, maxHistoryPerChannel);
+        }
     }
 
     function getTailForChannel (channel, lines, callback) {
