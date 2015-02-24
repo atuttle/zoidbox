@@ -111,6 +111,10 @@ shows how many times that query has been searched for.
 
 show the top 10 searched for queries against cfdocs
 
+### #cfdocs !export [md|json|text]
+
+export a gist of all of the custom descriptions stored in zoidbox.
+
 ### #cfbugs !poll
 
 Check for any new bugs in the ColdFusion bugbase (https://bugbase.adobe.com). Zoidbox will check every 15 minutes, but if you can't wait that long you can request an immediate check with this command.

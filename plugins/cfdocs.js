@@ -9,20 +9,7 @@ module.exports = (function(){
 		redis,
 		log,
 		conf,
-        queryExceptions = {
-            fw1: 'http://framework-one.github.io/documentation/',
-            di1: 'https://github.com/framework-one/di1/wiki (will change later)',
-            taffy: 'http://docs.taffy.io',
-            coldbox: 'http://wiki.coldbox.org/',
-            testbox: 'http://wiki.coldbox.org/wiki/TestBox.cfm',
-            wirebox: 'http://wiki.coldbox.org/wiki/WireBox.cfm',
-            commandbox: 'http://www.ortussolutions.com/products/commandbox/docs/current',
-            cfclient: '<cfclient></cfclient> → returns a pink slip, because if you use this shit you should be fired. ~ http://www.codecademy.com/en/tracks/javascript',
-            cf_socialplugin: '<cf_socialplugin .. /> → returns a bunch of outdated junk that would have been better as a community project dear god what have we done... we should have just given them a package manager like they\'ve been requesting for years ~ http://cfdocs.org/cf_socialplugin',
-            cfscriptref: 'https://github.com/daccfml/cfscript/blob/master/cfscript.md',
-            cfdownloads: 'http://www.gpickin.com/cfrepo/',
-            monkehtweets: 'https://github.com/coldfumonkeh/monkehTweets'
-        }; //make sure keys are completely lowercase
+        queryExceptions = {}; //make sure keys are completely lowercase
 
 	return function init( _bot ){
 		bot = _bot;
