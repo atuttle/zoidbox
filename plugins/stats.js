@@ -251,8 +251,14 @@ module.exports = (function(){
 
 		getNickMessageCount(channel, nick, function(err, data) {
 			if (data !== null && _.isNumber(_.parseInt(data)) && data % 1000 === 0) {
-				var time = moment().seconds(5 * data).fromNow(true);
-				bot.say(channel, 'Congrats ' + nick + '! Your ' + data + 'th message was: `' + text + '` ~ guessing an average of 5 seconds per message, that`s about ' + time + ' spent in IRC!');
+                var time = '';
+                if (nick === bot.botName) {
+                    time = moment().millisecond(5 * data).fromNow(true);
+                    bot.say(channel, 'Congrats ' + nick + '! Your ' + data + 'th message was: `' + text + '` ~ guessing an average of 5 milliseconds per message, that`s about ' + time + ' spent in IRC!');
+                } else {
+                    time = moment().seconds(5 * data).fromNow(true);
+                    bot.say(channel, 'Congrats ' + nick + '! Your ' + data + 'th message was: `' + text + '` ~ guessing an average of 5 seconds per message, that`s about ' + time + ' spent in IRC!');
+                }
 			}
 		});
 	}
@@ -383,6 +389,7 @@ module.exports = (function(){
 
 		bot.getCurrentlyOnline = getCurrentlyOnline;
 		bot.isCurrentlyOnline = isCurrentlyOnline;
+        bot.countMessage = countMessage;
 
 	};
 
