@@ -19,7 +19,7 @@
 		// handle the error safely
 		bot.say( '#zoidbox', err );
 		console.error(err);
-	}, 3000);
+	}, 3000));
 
 	//initialize
 	bot.setMaxListeners(15);
