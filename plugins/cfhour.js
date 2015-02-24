@@ -74,12 +74,22 @@ module.exports = (function(){
 
 						console.log('Feed info');
 						console.log('%s - %s - %s', meta.title, meta.link, meta.xmlurl);
+
+						var errors = 0;
 						articles.forEach(function (article){
 							console.log('%s - %s (Posted %s)', article.title, article.enclosures[0].url, article.date);
 							var showRef = article.title.split('-')[0];
 							showRef = showRef.substr(0, showRef.length -1);
-							notify( showRef, article.title, article.enclosures[0].url, quietly );
+							try {
+								notify( showRef, article.title, article.enclosures[0].url, quietly );
+							}catch(e){
+								errors++;
+							}
 						});
+
+						if (errors > 0){
+							bot.say( '#zoidbox', 'CFHour Plugin Error, please check the bot logs for details...');
+						}
 
 					} catch (e) {
 						console.error( 'Error parsing podcast feed response :(' );
@@ -98,7 +108,8 @@ module.exports = (function(){
 		quietly = quietly || false;
 		bot.redis.sismember( 'cfhour.seen', showRef, function( err, data ){
 			if ( err ){
-				return bot.say( '#zoidbox', 'CFHour plugin error' );
+				console.error( err );
+				throw new Error('Error in CFHour plugin, see bot logs for more details.');
 			}
 			if ( data === 0 ){ //haven't posted about this one yet, share it
 				if ( !quietly ){

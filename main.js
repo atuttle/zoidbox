@@ -1,6 +1,7 @@
 'use strict';
 
 (function bootstrap(){
+	var _ = require('lodash');
 	var conf = require('nconf')
 		.argv()
 		.env()
@@ -12,6 +13,13 @@
 		});
 
 	var bot = initIRC( conf );
+
+
+	process.on('uncaughtException', _.throttle(function(err) {
+		// handle the error safely
+		bot.say( '#zoidbox', err );
+		console.error(err);
+	}, 3000);
 
 	//initialize
 	bot.setMaxListeners(15);
@@ -39,7 +47,7 @@
 		);
 
 		b.conf = conf;
-        b.botName = conf.get('botName');
+		b.botName = conf.get('botName');
 		b.testingChannel = conf.get('testingChannel');
 		b.channels = conf.get('channels');
 
