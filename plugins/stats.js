@@ -40,7 +40,8 @@ module.exports = (function(){
 			redis.hget(bot.botName + '.' + to + '.lastseen', nick, function(err, data) {
 				if (data !== null) {
 					var date = new Date(parseInt(data, 10));
-					bot.say(to, 'I last saw ' + nick + ' around ' + date.toLocaleString());
+                    var duration = new Date().getTime() - data;
+					bot.say(to, 'I last saw ' + nick + ' around ' + date.toLocaleString() + ', ' + moment.duration(duration).humanize() + ' ago.');
 				} else {
 					bot.say(to, 'who? ' + nick + '? Never heard of them.');
 				}
