@@ -107,6 +107,71 @@ module.exports = (function(){
                         });
 
                         break;
+                    case '!export' :
+                        var format = 'json';
+                        if (parts.length > 2) {
+                            format = parts[2];
+                        }
+                        getCustomDescriptions(function (err, data) {
+                            if (err !== null) {
+                                console.error(err);
+                                return bot.say(to, 'error: ' + err);
+                            }
+                            var filename = bot.botName + '-custom-descriptions.';
+                            var output = '';
+
+                            switch (format) {
+                                case 'md' :
+                                case 'markdown' :
+                                    filename += 'md';
+                                    output = _.map(data, function(value, key) {
+                                        return '```' + decodeURI(key) + '``` ' + decodeURI(value);
+                                    }).join('\n\n');
+                                    break;
+                                case 'text' :
+                                    filename += 'text';
+                                    output = _.map(data, function(value, key) {
+                                        return decodeURI(key) + ': ' + decodeURI(value);
+                                    }).join('\n');
+                                    break;
+                                default :
+                                    filename += 'json';
+                                    output = JSON.stringify(data);
+                                    break;
+                            }
+
+                            createGist(filename, output, function (err, response, body) {
+                                if (err) {
+                                    console.error(err);
+                                    return bot.say(to, 'error: ' + err);
+                                }
+                                try {
+                                    var data = JSON.parse(body);
+                                    if (_.has(data, 'message') && _.has(data, 'documentation_url')) {
+                                        return bot.say(to, 'error: ' + body);
+                                    } else {
+                                        switch (format) {
+                                            case 'md' :
+                                            case 'markdown' :
+                                                return bot.say(to, 'Custom descriptions: ' + data.html_url);
+                                                break;
+                                            case 'text' :
+                                                return bot.say(to, 'Custom descriptions: ' + data.files[filename].raw_url);
+                                                break;
+                                            default :
+                                                return bot.say(to, 'Custom descriptions: ' + data.files[filename].raw_url);
+                                                break;
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error(e);
+                                    return bot.say(to, 'error:' + e);
+                                }
+
+                            });
+                        });
+
+                        break;
                     case '!reset' :
                         bot.ops.isOp(message.user, function(err, data){
                             if (data === 0) {
@@ -151,6 +216,10 @@ module.exports = (function(){
 
     function clearDesc (q) {
         redis.hdel(conf.get('botName') + '.customDescriptions', q.toLowerCase());
+    }
+
+    function getCustomDescriptions (callback) {
+        redis.hgetall(conf.get('botName') + '.customDescriptions', callback);
     }
 
     function getHits (channel, q, callback) {
@@ -215,8 +284,6 @@ module.exports = (function(){
 
         });
 
-
-
 	}
 
 	function docsApi (q, callback){
@@ -236,5 +303,21 @@ module.exports = (function(){
 			}
 		});
 	}
+
+    function createGist (filename, data, callback) {
+
+        var formData = {
+                description: 'Custom Descriptions from ' + bot.botName,
+                public: false,
+                files: {}
+            };
+
+        formData.files[filename] = {content: data};
+
+        request.post({
+            url: 'https://api.github.com/gists',
+            headers: {'user-agent': 'https://github.com/atuttle/zoidbox'},
+            form: JSON.stringify(formData)}, callback);
+    }
 
 }());
