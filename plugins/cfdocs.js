@@ -95,7 +95,7 @@ module.exports = (function(){
 
                         break;
                     case '!export' :
-                        var format = 'json';
+                        var format = 'md';
                         if (parts.length > 2) {
                             format = parts[2];
                         }
@@ -106,24 +106,28 @@ module.exports = (function(){
                             }
                             var filename = bot.botName + '-custom-descriptions.';
                             var output = '';
+                            var keys = _.keys(data).sort();
 
                             switch (format) {
                                 case 'md' :
                                 case 'markdown' :
                                     filename += 'md';
-                                    output = _.map(data, function(value, key) {
-                                        return '```' + decodeURI(key) + '``` ' + decodeURI(value);
+                                    output = _.map(keys, function(key) {
+                                        return '```' + decodeURI(key) + '``` ' + decodeURI(data[key]);
                                     }).join('\n\n');
                                     break;
                                 case 'text' :
                                     filename += 'text';
-                                    output = _.map(data, function(value, key) {
-                                        return decodeURI(key) + ': ' + decodeURI(value);
+                                    output = _.map(keys, function(key) {
+                                        return decodeURI(key) + ': ' + decodeURI(data[key]);
                                     }).join('\n');
                                     break;
-                                default :
+                                case 'json' :
                                     filename += 'json';
                                     output = JSON.stringify(data);
+                                    break;
+                                default :
+                                    return bot.say(to, 'I don`t understand that export format.  You can export to markdown, text or json');
                                     break;
                             }
 
@@ -145,7 +149,7 @@ module.exports = (function(){
                                             case 'text' :
                                                 return bot.say(to, 'Custom descriptions: ' + data.files[filename].raw_url);
                                                 break;
-                                            default :
+                                            case 'json' :
                                                 return bot.say(to, 'Custom descriptions: ' + data.files[filename].raw_url);
                                                 break;
                                         }
