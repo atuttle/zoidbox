@@ -63,7 +63,7 @@
 
 			walker.on('file', function(root, stat, next){
 
-				if (_.contains(['.js', '.es'], stat.name.slice(-3)) ){
+				if (_.contains(['.js', '.es6'], stat.name.slice(-3)) ){
 					console.log('loading plugin %s/%s', root, stat.name);
 					try {
 						bot.use( require( root + '/' + stat.name ) );

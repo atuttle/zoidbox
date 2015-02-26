@@ -13,7 +13,7 @@ module.exports = (function(){
 			    to = from;
 			}
 
-            const [command, ...message] = text.trim().split(' ');;
+            const [command, ...message] = text.trim().split(' ');
 
 			if (command === '#echo' && message.length) {
 				bot.say(to, message.join(' '));

@@ -1,6 +1,6 @@
 {
   "node": true
-  ,"esnext": false
+  ,"esnext": true
   ,"globals": [ "require", "module", "console" ]
   ,"quotmark": "single"
   ,"undef": true
