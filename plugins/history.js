@@ -35,6 +35,12 @@ module.exports = (function(){
             });
 		});
 
+        bot.on('ctcp', function(from, channel, command, text, message) {
+            if (command.indexOf('ACTION') === 0) {
+                logMessage(channel, message.nick, message.user, '* ' + message.nick + ' ' + command.replace('ACTION', '').trim());
+            }
+        });
+
         bot.on('message', function(from, to, text, message) {
             logMessage(to, message.nick, message.user, text);
 
@@ -48,23 +54,22 @@ module.exports = (function(){
             var parts = text.split(' ');
             var channel = to;
 
-            if (parts[0] === '#maxHistoryPerChannel') {
-                bot.say(to, maxHistoryPerChannel);
-            } else if (parts[0] === '#taillen') {
+            if (parts[0] === '#tail') {
                 if (parts.length > 1) {
-                    channel = parts[1];
-                }
-                getHistoryCountForChannel(channel, function(err, data) {
-                    if (err) {
-                        console.error(err);
-                        return bot.say(to, err);
-                    }
-                    bot.say(to, 'I have ' + data + ' lines of history for ' + channel);
-                });
-
-            } else if (parts[0] === '#tail') {
-                if (parts.length > 1) {
-                    if (parts[1] === '!missed') {
+                    if (parts[1] === '!len') {
+                        if (parts.length > 2) {
+                            channel = parts[2];
+                        }
+                        getHistoryCountForChannel(channel, function(err, data) {
+                            if (err) {
+                                console.error(err);
+                                return bot.say(to, err);
+                            }
+                            return bot.say(to, 'I have ' + data + ' lines of history for ' + channel);
+                        });
+                    } else if (parts[1] === '!max') {
+                        return bot.say(to, maxHistoryPerChannel);
+                    } else if (parts[1] === '!missed') {
                         if (parts.length > 2) {
                             channel = parts[2];
                         }
@@ -109,7 +114,7 @@ module.exports = (function(){
                                 });
 
                             } else {
-                                bot.say(to, 'who are you again?');
+                                bot.say(to, 'who are you again? (I don`t know when you last left, so I can`t give you what you have missed)');
                             }
                         });
                     } else if (isNumber(parts[1])) {
@@ -197,14 +202,16 @@ module.exports = (function(){
     }
 
     function logMessage (channel, nick, user, text) {
-        var data = {
-            nick: nick,
-            user: user,
-            text: text,
-            time: new Date().getTime()
-        };
-        redis.lpush('channel_log.' + channel, JSON.stringify(data));
-        redis.ltrim('channel_log.' + channel, 0, maxHistoryPerChannel);
+        if (channel.indexOf('#') === 0) { //only log actual channels, not private messages
+            var data = {
+                nick: nick,
+                user: user,
+                text: text,
+                time: new Date().getTime()
+            };
+            redis.lpush('channel_log.' + channel, JSON.stringify(data));
+            redis.ltrim('channel_log.' + channel, 0, maxHistoryPerChannel);
+        }
     }
 
     function getTailForChannel (channel, lines, callback) {

@@ -9,20 +9,7 @@ module.exports = (function(){
 		redis,
 		log,
 		conf,
-        queryExceptions = {
-            fw1: 'http://framework-one.github.io/documentation/',
-            di1: 'https://github.com/framework-one/di1/wiki (will change later)',
-            taffy: 'http://docs.taffy.io',
-            coldbox: 'http://wiki.coldbox.org/',
-            testbox: 'http://wiki.coldbox.org/wiki/TestBox.cfm',
-            wirebox: 'http://wiki.coldbox.org/wiki/WireBox.cfm',
-            commandbox: 'http://www.ortussolutions.com/products/commandbox/docs/current',
-            cfclient: '<cfclient></cfclient> → returns a pink slip, because if you use this shit you should be fired. ~ http://www.codecademy.com/en/tracks/javascript',
-            cf_socialplugin: '<cf_socialplugin .. /> → returns a bunch of outdated junk that would have been better as a community project dear god what have we done... we should have just given them a package manager like they\'ve been requesting for years ~ http://cfdocs.org/cf_socialplugin',
-            cfscriptref: 'https://github.com/daccfml/cfscript/blob/master/cfscript.md',
-            cfdownloads: 'http://www.gpickin.com/cfrepo/',
-            monkehtweets: 'https://github.com/coldfumonkeh/monkehTweets'
-        }; //make sure keys are completely lowercase
+        queryExceptions = {}; //make sure keys are completely lowercase
 
 	return function init( _bot ){
 		bot = _bot;
@@ -107,6 +94,75 @@ module.exports = (function(){
                         });
 
                         break;
+                    case '!export' :
+                        var format = 'md';
+                        if (parts.length > 2) {
+                            format = parts[2];
+                        }
+                        getCustomDescriptions(function (err, data) {
+                            if (err !== null) {
+                                console.error(err);
+                                return bot.say(to, 'error: ' + err);
+                            }
+                            var filename = bot.botName + '-custom-descriptions.';
+                            var output = '';
+                            var keys = _.keys(data).sort();
+
+                            switch (format) {
+                                case 'md' :
+                                case 'markdown' :
+                                    filename += 'md';
+                                    output = _.map(keys, function(key) {
+                                        return '```' + decodeURI(key) + '``` ' + decodeURI(data[key]);
+                                    }).join('\n\n');
+                                    break;
+                                case 'text' :
+                                    filename += 'text';
+                                    output = _.map(keys, function(key) {
+                                        return decodeURI(key) + ': ' + decodeURI(data[key]);
+                                    }).join('\n');
+                                    break;
+                                case 'json' :
+                                    filename += 'json';
+                                    output = JSON.stringify(data);
+                                    break;
+                                default :
+                                    return bot.say(to, 'I don`t understand that export format.  You can export to markdown, text or json');
+                                    break;
+                            }
+
+                            createGist(filename, output, function (err, response, body) {
+                                if (err) {
+                                    console.error(err);
+                                    return bot.say(to, 'error: ' + err);
+                                }
+                                try {
+                                    var data = JSON.parse(body);
+                                    if (_.has(data, 'message') && _.has(data, 'documentation_url')) {
+                                        return bot.say(to, 'error: ' + body);
+                                    } else {
+                                        switch (format) {
+                                            case 'md' :
+                                            case 'markdown' :
+                                                return bot.say(to, 'Custom descriptions: ' + data.html_url);
+                                                break;
+                                            case 'text' :
+                                                return bot.say(to, 'Custom descriptions: ' + data.files[filename].raw_url);
+                                                break;
+                                            case 'json' :
+                                                return bot.say(to, 'Custom descriptions: ' + data.files[filename].raw_url);
+                                                break;
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error(e);
+                                    return bot.say(to, 'error:' + e);
+                                }
+
+                            });
+                        });
+
+                        break;
                     case '!reset' :
                         bot.ops.isOp(message.user, function(err, data){
                             if (data === 0) {
@@ -151,6 +207,10 @@ module.exports = (function(){
 
     function clearDesc (q) {
         redis.hdel(conf.get('botName') + '.customDescriptions', q.toLowerCase());
+    }
+
+    function getCustomDescriptions (callback) {
+        redis.hgetall(conf.get('botName') + '.customDescriptions', callback);
     }
 
     function getHits (channel, q, callback) {
@@ -215,8 +275,6 @@ module.exports = (function(){
 
         });
 
-
-
 	}
 
 	function docsApi (q, callback){
@@ -236,5 +294,21 @@ module.exports = (function(){
 			}
 		});
 	}
+
+    function createGist (filename, data, callback) {
+
+        var formData = {
+                description: 'Custom Descriptions from ' + bot.botName,
+                public: false,
+                files: {}
+            };
+
+        formData.files[filename] = {content: data};
+
+        request.post({
+            url: 'https://api.github.com/gists',
+            headers: {'user-agent': 'https://github.com/atuttle/zoidbox'},
+            form: JSON.stringify(formData)}, callback);
+    }
 
 }());

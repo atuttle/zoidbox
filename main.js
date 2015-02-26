@@ -14,7 +14,7 @@
 	var bot = initIRC( conf );
 
 	//initialize
-	bot.setMaxListeners(15);
+	bot.setMaxListeners(20);
 	bot.use( require('./lib/core') );
 	bot.use( require('./lib/ops') );
 	bot.loadPlugins();

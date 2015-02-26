@@ -32,7 +32,7 @@ tells you the last people to leave.
 
 tells you when `nick` last quit or parted the channel.
 
-### +1 nick or nick: +1
+### +1 nick or nick: +1 or nick++
 
 gives karma to `nick`
 
@@ -111,6 +111,10 @@ shows how many times that query has been searched for.
 
 show the top 10 searched for queries against cfdocs
 
+### #cfdocs !export [md|json|text]
+
+export a gist of all of the custom descriptions stored in zoidbox.
+
 ### #cfbugs !poll
 
 Check for any new bugs in the ColdFusion bugbase (https://bugbase.adobe.com). Zoidbox will check every 15 minutes, but if you can't wait that long you can request an immediate check with this command.
@@ -153,11 +157,11 @@ Check for any new shows in the CFHour feed (http://feeds.feedburner.com/CfhourCo
 
 If you mention a bitbucket or github issue url, zoidbox will respond with some information about the issue.
 
-### #maxHistoryPerChannel
+### #tail !max
 
 The maximum number of log entries stored in the bot per channel.
 
-### #taillen {channel}
+### #tail !len {channel}
 
 The number of log entries currently stored in the channel.  channel is optional, if omitted it uses the current channel.
 

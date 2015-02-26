@@ -40,7 +40,8 @@ module.exports = (function(){
 			redis.hget(bot.botName + '.' + to + '.lastseen', nick, function(err, data) {
 				if (data !== null) {
 					var date = new Date(parseInt(data, 10));
-					bot.say(to, 'I last saw ' + nick + ' around ' + date.toLocaleString());
+                    var duration = new Date().getTime() - data;
+					bot.say(to, 'I last saw ' + nick + ' around ' + date.toLocaleString() + ', ' + moment.duration(duration).humanize() + ' ago.');
 				} else {
 					bot.say(to, 'who? ' + nick + '? Never heard of them.');
 				}
@@ -251,8 +252,14 @@ module.exports = (function(){
 
 		getNickMessageCount(channel, nick, function(err, data) {
 			if (data !== null && _.isNumber(_.parseInt(data)) && data % 1000 === 0) {
-				var time = moment().seconds(5 * data).fromNow(true);
-				bot.say(channel, 'Congrats ' + nick + '! Your ' + data + 'th message was: `' + text + '` ~ guessing an average of 5 seconds per message, that`s about ' + time + ' spent in IRC!');
+                var time = '';
+                if (nick === bot.botName) {
+                    time = moment().millisecond(5 * data).fromNow(true);
+                    bot.say(channel, 'Congrats ' + nick + '! Your ' + data + 'th message was: `' + text + '` ~ guessing an average of 5 milliseconds per message, that`s about ' + time + ' spent in IRC!');
+                } else {
+                    time = moment().seconds(5 * data).fromNow(true);
+                    bot.say(channel, 'Congrats ' + nick + '! Your ' + data + 'th message was: `' + text + '` ~ guessing an average of 5 seconds per message, that`s about ' + time + ' spent in IRC!');
+                }
 			}
 		});
 	}
@@ -344,12 +351,19 @@ module.exports = (function(){
             });
 		});
 
-		bot.addListener('message', function( from, to, text){
+   		bot.addListener('ctcp', function( from, to, command, text, message) {
+            setLastSeen(to, from);
+            if (command.indexOf('ACTION') === 0) {
+                countMessage(to, from, '* ' + message.nick + ' ' + command.replace('ACTION', '').trim());
+            }
+        });
 
-			if (bot.isChannelPaused(to)) return;
+		bot.addListener('message', function( from, to, text){
 
 			setLastSeen(to, from);
 			countMessage(to, from, text);
+
+            if (bot.isChannelPaused(to)) return;
 
 			if (to === bot.botName) {
 				//they are talking to us in a private message, set to to be from
@@ -376,6 +390,7 @@ module.exports = (function(){
 
 		bot.getCurrentlyOnline = getCurrentlyOnline;
 		bot.isCurrentlyOnline = isCurrentlyOnline;
+        bot.countMessage = countMessage;
 
 	};
 

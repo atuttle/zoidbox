@@ -23,6 +23,11 @@ module.exports = (function(){
 		addKarma(nick[0], from, to, text);
 	});
 
+	emit.on('addKarmaPlusPlus', function(from, to, text) {
+		var nick = text.replace(/\+\+/g, '').trim().split(' ');
+		addKarma(nick[0], from, to, text);
+	});
+
 	emit.on('karma', function(from, to, text, message){
 		var nick = text.replace('#karma', '').trim();
 
@@ -342,6 +347,8 @@ module.exports = (function(){
 				emit.emit('addKarmaSucceeding', from, to, text);
 			} else if (text.search(/^\+1[:,\s]*[\w\[\]]/g) !== -1) {
 				emit.emit('addKarmaPreceding', from, to, text);
+            } else if (text.search(/^\w*\+\+/g) !== -1) {
+				emit.emit('addKarmaPlusPlus', from, to, text);
 			} else if (text.indexOf('#karmagivers') === 0) {
 				emit.emit('karmaGivers', from, to, text, message);
 			} else if (text.indexOf('#karma') === 0) {
