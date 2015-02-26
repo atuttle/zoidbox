@@ -75,7 +75,7 @@ module.exports = (function(){
 						if (index > 0) {
 							acc += ', ';
 						}
-						return acc += item.name;
+						return acc + item.name;
 					}, '');
 					labels = labels.trim();
 					if (labels.length) {

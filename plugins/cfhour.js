@@ -2,9 +2,6 @@
 
 module.exports = (function(){
 
-	var _ = require( 'lodash' );
-	var request = require( 'request' );
-	var charmed = require( 'charmed' );
 	var feedparser = require('ortoo-feedparser');
 	var bot;
 	var frequency = 1000 * 60 * 15; //every 15 minutes

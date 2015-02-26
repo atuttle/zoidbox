@@ -8,7 +8,6 @@ var spotifyApi = new SpotifyWebApi();
 module.exports = (function(){
 
   var bot,
-	redis,
 	log,
 	conf;
 
@@ -17,7 +16,7 @@ module.exports = (function(){
 	log = bot.log;
 	conf = bot.conf;
 
-	bot.on( 'message', function( from, to, text, message ){
+	bot.on( 'message', function( from, to, text ){
 
 	  if (bot.isChannelPaused(to)) return;
 
