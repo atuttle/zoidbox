@@ -4,12 +4,12 @@ module.exports = (function(){
 
 	var _ = require('lodash');
 	var bot,
-        conf,
-        hushed = false;
+		conf,
+		hushed = false;
 
 	return function init (_bot){
 		bot = _bot;
-        conf = bot.conf;
+		conf = bot.conf;
 
 		bot.on( 'message#', function( from, to, text ) {
 
@@ -91,25 +91,25 @@ module.exports = (function(){
 	function random8ball (from) {
 		var responses = [
 			'As I see it, yes.'
-		    , 'It is certain.'
-		    , 'It is decidedly so.'
-		    , 'Most likely.'
-		    , 'Outlook good.'
-		    , 'Signs point to yes.'
-		    , 'Without a doubt.'
-		    , 'Yes.'
-		    , 'Yes - definitely.'
-		    , 'You may rely on it.'
-		    , 'Reply hazy, try again.'
-		    , 'Ask again later.'
-		    , 'Better not tell you now.'
-		    , 'Cannot predict now.'
-		    , 'Concentrate and ask again.'
-		    , 'Don`t count on it.'
-		    , 'My reply is no.'
-		    , 'My sources say no.'
-		    , 'Outlook not so good.'
-		    , 'Very doubtful.'];
+			, 'It is certain.'
+			, 'It is decidedly so.'
+			, 'Most likely.'
+			, 'Outlook good.'
+			, 'Signs point to yes.'
+			, 'Without a doubt.'
+			, 'Yes.'
+			, 'Yes - definitely.'
+			, 'You may rely on it.'
+			, 'Reply hazy, try again.'
+			, 'Ask again later.'
+			, 'Better not tell you now.'
+			, 'Cannot predict now.'
+			, 'Concentrate and ask again.'
+			, 'Don`t count on it.'
+			, 'My reply is no.'
+			, 'My sources say no.'
+			, 'Outlook not so good.'
+			, 'Very doubtful.'];
 
 		return responses[_.random(0, responses.length)].split('{from}').join(from);
 	}

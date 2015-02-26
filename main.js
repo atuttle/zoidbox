@@ -39,7 +39,7 @@
 		);
 
 		b.conf = conf;
-        b.botName = conf.get('botName');
+		b.botName = conf.get('botName');
 		b.testingChannel = conf.get('testingChannel');
 		b.channels = conf.get('channels');
 

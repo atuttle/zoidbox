@@ -13,8 +13,8 @@ module.exports = (function(){
 			if (bot.isChannelPaused(to)) return;
 
 			if (to === bot.botName) {
-			    //they are talking to us in a private message, set to to be from
-			    to = from;
+				//they are talking to us in a private message, set to to be from
+				to = from;
 			}
 
 			if (text.indexOf('^') === 0 && text.length >= 4 && text.split(' ').length === 1) {

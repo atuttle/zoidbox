@@ -325,7 +325,7 @@ module.exports = (function() {
 			return bot.say(to, 'Poll created; Use #poll -open to start!');
 		}
 
- 	});
+	});
 
 	emit.on('pollOpen', function(from, to) {
 		if (!isValidQuestion()) {
@@ -448,68 +448,68 @@ module.exports = (function() {
 		return bot.say(to, 'Sorry ' + from + ', I didn`t understand that.  Please reply with #poll {Answer Letter}.  Use #poll to see the question and possible answers.');
 	});
 
-    return function init (_bot) {
+	return function init (_bot) {
 		bot = _bot;
 		log = bot.log;
 		conf = bot.conf;
 		redis = bot.redis;
 
-	    state = _.cloneDeep(defaultState);
+		state = _.cloneDeep(defaultState);
 
-	    restoreState();
+		restoreState();
 
-	    bot.on( 'message', function (from, to, text, message){
+		bot.on( 'message', function (from, to, text, message){
 
 			if (bot.isChannelPaused(to)) return;
 
-            var isPrivateMessage = false;
+			var isPrivateMessage = false;
 
 			if (to === bot.botName) {
-			    //they are talking to us in a private message, set to to be from
-			    to = from;
-                isPrivateMessage = true;
+				//they are talking to us in a private message, set to to be from
+				to = from;
+				isPrivateMessage = true;
 			}
 
-            if (text.indexOf('#poll') === 0) {
+			if (text.indexOf('#poll') === 0) {
 
-                var parts = text.trim().split(' ');
+				var parts = text.trim().split(' ');
 
-                if (parts.length > 1) {
+				if (parts.length > 1) {
 
-                    switch (parts[1].trim()) {
-	                    case '-create' :
+					switch (parts[1].trim()) {
+						case '-create' :
 							emit.emit('pollCreate', from, to, text, message, isPrivateMessage);
-		                    break;
-	                    case '-open' :
+							break;
+						case '-open' :
 							emit.emit('pollOpen', from, to, text, message, isPrivateMessage);
-		                    break;
-	                    case '-status' :
+							break;
+						case '-status' :
 							emit.emit('pollStatus', from, to, text, message, isPrivateMessage);
-		                    break;
-	                    case '-close' :
+							break;
+						case '-close' :
 							emit.emit('pollClose', from, to, text, message, isPrivateMessage);
-		                    break;
-	                    case '-results' :
-	                    case '-peek' :
+							break;
+						case '-results' :
+						case '-peek' :
 							emit.emit('pollResults', from, to, text, message, isPrivateMessage);
-		                    break;
-	                    case '-reset' :
+							break;
+						case '-reset' :
 							emit.emit('pollReset', from, to, text, message, isPrivateMessage);
-		                    break;
-	                    case '-clear' :
+							break;
+						case '-clear' :
 							emit.emit('pollClear', from, to, text, message, isPrivateMessage);
-		                    break;
-	                    case '-rescind' :
+							break;
+						case '-rescind' :
 							emit.emit('pollRescind', from, to, text, message, isPrivateMessage);
-		                    break;
-	                    default : //they have said #poll [something], assume they are trying to vote
-		                    emit.emit('pollVote', from, to, text, message, isPrivateMessage);
-		                    break;
-                    }
-                } else {
-                    emit.emit('pollCheck', from, to, text, message, isPrivateMessage);
-                }
-            }
+							break;
+						default : //they have said #poll [something], assume they are trying to vote
+							emit.emit('pollVote', from, to, text, message, isPrivateMessage);
+							break;
+					}
+				} else {
+					emit.emit('pollCheck', from, to, text, message, isPrivateMessage);
+				}
+			}
 
 		});
 	};
