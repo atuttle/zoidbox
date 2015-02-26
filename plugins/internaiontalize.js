@@ -34,12 +34,12 @@ module.exports = (function(){
 
 	function c2f( c ){
 		var result = Math.round( c * 9 / 5 + 32 );
-		return (result <= -20) ? "FUCKING COLD: " + result : result;
+		return (result <= -20) ? 'FUCKING COLD: ' + result : result;
 	}
 
 	function f2c( f ){
 		var result = Math.round( (f - 32) * 5 / 9 );
-		return (result <= -29) ? "FOOKING COLD, EH? " + result : result;
+		return (result <= -29) ? 'FOOKING COLD, EH? ' + result : result;
 	}
 
 })();
