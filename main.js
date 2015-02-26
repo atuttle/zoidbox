@@ -1,6 +1,15 @@
 'use strict';
 
 (function bootstrap(){
+
+    require('babel/register')({
+      // Setting this will remove the currently hooked extensions of .es6, `.es`, `.jsx`
+      // and .js so you'll have to add them back if you want them to be used again.
+      extensions: ['.es6', '.es', '.jsx']
+    });
+
+
+    var _ = require('lodash');
 	var conf = require('nconf')
 		.argv()
 		.env()
@@ -54,7 +63,7 @@
 
 			walker.on('file', function(root, stat, next){
 
-				if ( stat.name.slice(-3) === '.js' ){
+				if (_.contains(['.js', '.es'], stat.name.slice(-3)) ){
 					console.log('loading plugin %s/%s', root, stat.name);
 					try {
 						bot.use( require( root + '/' + stat.name ) );
