@@ -126,9 +126,14 @@ module.exports = (function(){
 		bot.say(to, 'eeny,  meeny,  miny, ... ' + currentlyOnlineUsers[_.random(0, currentlyOnlineUsers.length-1)]);
 	});
 
-	emit.on('currentlyonline', function(from, to) {
-		var currentlyOnlineUsers = getCurrentlyOnline(to);
-		bot.say(to, 'I see: ' + currentlyOnlineUsers.join(', '));
+	emit.on('currentlyonline', function(from, to, text) {
+		var channel = to;
+		var parts = text.trim().split(' ');
+		if (parts.length > 1) {
+			channel = parts[1];
+		}
+		var currentlyOnlineUsers = getCurrentlyOnline(channel);
+		bot.say(to, 'In ' + channel + ' I currently see: ' + currentlyOnlineUsers.join(', '));
 	});
 
 	emit.on('maxcount', function(from, channel, text) {
@@ -298,10 +303,11 @@ module.exports = (function(){
 					if (!_.isNull(data) && data.length > 0) {
 						try {
 							data = JSON.parse(data);
-							maxUsers[channel] = data.maxUsersCount;
+							maxUsers[channel] = data.maxUserCount;
 						} catch (e) {}
 					} else {
 						setMaxUsers(0, channel);
+						maxUsers[channel] = 0;
 					}
 
 					log('populate maxusers', channel, maxUsers[channel]);
