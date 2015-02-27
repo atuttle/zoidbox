@@ -37,6 +37,8 @@ module.exports = (function(){
 				}
 			} else if (text.indexOf('#hush') === 0 || (text.indexOf(me) === 0) && text.search(/\bhush\b/) > 0) {
 				hush(from, text);
+			} else if (text.indexOf('#trout') === 0 && parts.length > 1) {
+				bot.action(to, randomAssault() + ' ' + parts[1] + ' with a' + randomTroutSize() + 'trout');
 			} else if (!hushed) {
 				if (text.indexOf('box install ') === 0) {
 					bot.action(to, 'giggles');
@@ -54,6 +56,16 @@ module.exports = (function(){
 
 		});
 	};
+
+	function randomAssault () {
+		var actions = ['smacks', 'slaps', 'whacks', 'punches', 'assaults', 'wallops', 'broadsides', 'thwacks'];
+		return actions[Math.floor(Math.random() * actions.length)];
+	}
+
+	function randomTroutSize () {
+		var sizes = [' itty bitty ', ' tiny ', ' small ', ' rather large ', 'n enormous ', ' gigantic ', 'n average sized ', ' venti ', ' ginormous ', ' mecha-', ' handmade, etsy sourced '];
+		return sizes[Math.floor(Math.random() * sizes.length)];
+	}
 
 	function randomZoidism(from){
 		var zoidisms = [

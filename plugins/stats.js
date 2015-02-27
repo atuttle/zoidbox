@@ -347,13 +347,20 @@ module.exports = (function(){
 
 		});
 
-		bot.addListener('nick', function(oldNick, newNick, channels) {
-			log('nick', oldNick, newNick, channels);
+		bot.addListener('nick', function(oldNick, newNick, channels, message) {
+			log('nick', oldNick, newNick, channels, message);
 			_.each(channels, function(channel) {
-				setLastSeen(channel, oldNick);
-				setLastSeen(channel, newNick);
-				setCurrentlyOnline(channel, oldNick, false);
-				setCurrentlyOnline(channel, newNick, true);
+				if (isCurrentlyOnline(channel, oldNick)) {
+					setLastSeen(channel, oldNick);
+					setCurrentlyOnline(channel, oldNick, false);
+				}
+			});
+			bot.whois(newNick, function(info){
+				_.each(info.channels, function (channel) {
+					channel = channel.replace('@', '');
+					setLastSeen(channel, newNick);
+					setCurrentlyOnline(channel, newNick, true);
+				});
 			});
 		});
 
