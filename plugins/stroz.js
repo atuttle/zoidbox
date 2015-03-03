@@ -38,7 +38,7 @@ module.exports = (function(){
 			} else if (text.indexOf('#hush') === 0 || (text.indexOf(me) === 0) && text.search(/\bhush\b/) > 0) {
 				hush(from, text);
 			} else if (text.indexOf('#trout') === 0 && parts.length > 1) {
-				bot.action(to, randomAssault() + ' ' + parts[1] + ' with a' + randomTroutSize() + 'trout');
+				bot.action(to, randomAssault() + ' ' + parts.slice(1, parts.length).join(' ') + ' with a' + randomTroutSize() + 'trout');
 			} else if (!hushed) {
 				if (text.indexOf('box install ') === 0) {
 					bot.action(to, 'giggles');
@@ -58,7 +58,7 @@ module.exports = (function(){
 	};
 
 	function randomAssault () {
-		var actions = ['smacks', 'slaps', 'whacks', 'punches', 'assaults', 'wallops', 'broadsides', 'thwacks'];
+		var actions = ['smacks', 'slaps', 'whacks', 'punches', 'assaults', 'wallops', 'broadsides', 'thwacks', 'flogs'];
 		return actions[Math.floor(Math.random() * actions.length)];
 	}
 
