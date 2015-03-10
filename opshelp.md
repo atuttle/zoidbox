@@ -12,6 +12,10 @@ make a user an op
 
 make a user not an op
 
+### #changenick currentNick newNick
+
+make the bot change its nick, currentNick must be the nickname the bot is currently using.
+
 ### #karma !reset nick
 
 reset a user's karma
