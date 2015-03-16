@@ -104,7 +104,7 @@ module.exports = (function(){
 								console.error(err);
 								return bot.say(to, 'error: ' + err);
 							}
-							var filename = bot.botName + '-custom-descriptions.';
+							var filename = bot.botID + '-custom-descriptions.';
 							var output = '';
 							var keys = _.keys(data).sort();
 
@@ -193,40 +193,40 @@ module.exports = (function(){
 	};
 
 	function loghit (channel, q) {
-		redis.hincrby(conf.get('botName') + '.' + channel + '.cfdocs_hits', q.toLowerCase(), 1);
-		redis.hincrby(conf.get('botName') + '.' + channel + '.cfdocs_hits', 'TOTAL', 1);
+		redis.hincrby(bot.botID + '.' + channel + '.cfdocs_hits', q.toLowerCase(), 1);
+		redis.hincrby(bot.botID + '.' + channel + '.cfdocs_hits', 'TOTAL', 1);
 	}
 
 	function setDesc (q, desc) {
-		redis.hset(conf.get('botName') + '.customDescriptions', q.toLowerCase(), desc);
+		redis.hset(bot.botID + '.customDescriptions', q.toLowerCase(), desc);
 	}
 
 	function getDesc (q, callback) {
-		redis.hget(conf.get('botName') + '.customDescriptions', q.toLowerCase(), callback);
+		redis.hget(bot.botID + '.customDescriptions', q.toLowerCase(), callback);
 	}
 
 	function clearDesc (q) {
-		redis.hdel(conf.get('botName') + '.customDescriptions', q.toLowerCase());
+		redis.hdel(bot.botID + '.customDescriptions', q.toLowerCase());
 	}
 
 	function getCustomDescriptions (callback) {
-		redis.hgetall(conf.get('botName') + '.customDescriptions', callback);
+		redis.hgetall(bot.botID + '.customDescriptions', callback);
 	}
 
 	function getHits (channel, q, callback) {
-		redis.hget(conf.get('botName') + '.' + channel + '.cfdocs_hits', q.toLowerCase(), callback);
+		redis.hget(bot.botID + '.' + channel + '.cfdocs_hits', q.toLowerCase(), callback);
 	}
 
 	function getTotalHits (channel, callback) {
-		redis.hget(conf.get('botName') + '.' + channel + '.cfdocs_hits', 'TOTAL', callback);
+		redis.hget(bot.botID + '.' + channel + '.cfdocs_hits', 'TOTAL', callback);
 	}
 
 	function getLeaderboard(channel, callback) {
-		redis.hgetall(conf.get('botName') + '.' + channel + '.cfdocs_hits', callback);
+		redis.hgetall(bot.botID + '.' + channel + '.cfdocs_hits', callback);
 	}
 
 	function resetHits(channel) {
-		redis.del(conf.get('botName') + '.' + channel + '.cfdocs_hits');
+		redis.del(bot.botID + '.' + channel + '.cfdocs_hits');
 	}
 
 	function docs (channel, q){
@@ -260,7 +260,7 @@ module.exports = (function(){
 								msg = result.syntax + ' → returns ' + ( result.returns.length ? result.returns : ' nothing' );
 							}
 
-							var bufferRemaining = theoreticalMax - ( (conf.get('botName').length + 1) + link.length);
+							var bufferRemaining = theoreticalMax - ( (bot.botName.length + 1) + link.length);
 							var fitMsg = msg.substr(0, bufferRemaining);
 							if (fitMsg !== msg){
 								fitMsg = fitMsg + '…';
@@ -298,7 +298,7 @@ module.exports = (function(){
 	function createGist (filename, data, callback) {
 
 		var formData = {
-				description: 'Custom Descriptions from ' + bot.botName,
+				description: 'Custom Descriptions from ' + bot.botID,
 				public: false,
 				files: {}
 			};

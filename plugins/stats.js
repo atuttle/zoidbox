@@ -37,7 +37,7 @@ module.exports = (function(){
 		var nick = text.replace('#lastseen', '').trim().toLowerCase();
 
 		if (nick.length) {
-			redis.hget(bot.botName + '.' + to + '.lastseen', nick, function(err, data) {
+			redis.hget(bot.botID + '.' + to + '.lastseen', nick, function(err, data) {
 				if (data !== null) {
 					var date = new Date(parseInt(data, 10));
 					var duration = new Date().getTime() - data;
@@ -47,7 +47,7 @@ module.exports = (function(){
 				}
 			});
 		} else {
-			redis.hgetall(bot.botName + '.' + to + '.lastseen', function(err, data){
+			redis.hgetall(bot.botID + '.' + to + '.lastseen', function(err, data){
 				log(data);
 				if (data !== null) {
 					var people = _.map(_.sortBy(_.map(data, function(item, key) { return [key, item];}), 1).reverse().slice(0, 10), function(item) {return item[0];}).join(', ');
@@ -63,7 +63,7 @@ module.exports = (function(){
 		var nick = text.replace('#lastleave', '').trim().toLowerCase();
 
 		if (nick.length) {
-			redis.hget(bot.botName + '.' + to + '.lastleave', nick, function(err, data) {
+			redis.hget(bot.botID + '.' + to + '.lastleave', nick, function(err, data) {
 				if (data !== null) {
 					var date = new Date(parseInt(data, 10));
 					bot.say(to, 'I last saw ' + nick + ' leave around ' + date.toLocaleString());
@@ -72,7 +72,7 @@ module.exports = (function(){
 				}
 			});
 		} else {
-			redis.hgetall(bot.botName + '.' + to + '.lastleave', function(err, data){
+			redis.hgetall(bot.botID + '.' + to + '.lastleave', function(err, data){
 				log(data);
 				if (data !== null) {
 					var people = _.map(_.sortBy(_.map(data, function(item, key) { return [key, item];}), 1).reverse().slice(0, 10), function(item) {return item[0];}).join(', ');
@@ -98,7 +98,7 @@ module.exports = (function(){
 					}
 				});
 			} else if (nick.toLowerCase().split(' ')[0] === '!all' && to === bot.testingChannel) {
-				log('!all', to, bot.botName);
+				//log('!all', to, bot.botName);
 				getChannels(function(err, data){
 					bot.say(to, 'I have data for the following channels: ' + data.join(', '));
 					_.each(data, function(channel) {
@@ -189,11 +189,11 @@ module.exports = (function(){
 	}
 
 	function setLastSeen (channel, nick) {
-		redis.hset(bot.botName + '.' + channel + '.lastseen', nick.toLowerCase(), Date.now());
+		redis.hset(bot.botID + '.' + channel + '.lastseen', nick.toLowerCase(), Date.now());
 	}
 
 	function setLastLeave (channel, nick) {
-		redis.hset(bot.botName + '.' + channel + '.lastleave', nick.toLowerCase(), Date.now());
+		redis.hset(bot.botID + '.' + channel + '.lastleave', nick.toLowerCase(), Date.now());
 	}
 
 	function setCurrentlyOnline(channel, nick, isOnline) {
@@ -234,11 +234,11 @@ module.exports = (function(){
 	}
 
 	function setMaxUsers (maxUsersCount, channel) {
-		redis.set(bot.botName + '.' + channel.toLowerCase() + '.maxUsers', JSON.stringify({maxUserCount: maxUsersCount, dte: new Date().getTime()}));
+		redis.set(bot.botID + '.' + channel.toLowerCase() + '.maxUsers', JSON.stringify({maxUserCount: maxUsersCount, dte: new Date().getTime()}));
 	}
 
 	function getMaxUsers (channel, callback) {
-		redis.get(bot.botName + '.' + channel.toLowerCase() + '.maxUsers', callback);
+		redis.get(bot.botID + '.' + channel.toLowerCase() + '.maxUsers', callback);
 	}
 
 	function isCurrentlyOnline (channel, nick) {
@@ -247,18 +247,18 @@ module.exports = (function(){
 	}
 
 	function getChannels (callback) {
-		redis.smembers(bot.botName + '.channels', callback);
+		redis.smembers(bot.botID + '.channels', callback);
 	}
 
 	function countMessage (channel, nick, text) {
-		redis.sadd(bot.botName + '.channels', channel);
-		redis.hincrby(bot.botName + '.' + channel + '.messageCount', channel, 1);
-		redis.hincrby(bot.botName + '.' + channel + '.messageCount', nick.toLowerCase(), 1);
+		redis.sadd(bot.botID + '.channels', channel);
+		redis.hincrby(bot.botID + '.' + channel + '.messageCount', channel, 1);
+		redis.hincrby(bot.botID + '.' + channel + '.messageCount', nick.toLowerCase(), 1);
 
 		getNickMessageCount(channel, nick, function(err, data) {
 			if (data !== null && _.isNumber(_.parseInt(data)) && data % 1000 === 0) {
 				var time = '';
-				if (nick === bot.botName) {
+				if (nick === bot.botID) {
 					time = moment().millisecond(5 * data).fromNow(true);
 					bot.say(channel, 'Congrats ' + nick + '! Your ' + data + 'th message was: `' + text + '` ~ guessing an average of 5 milliseconds per message, that`s about ' + time + ' spent in IRC!');
 				} else {
@@ -270,19 +270,19 @@ module.exports = (function(){
 	}
 
 	function getChannelMessageCount (channel, callback) {
-		redis.hget(bot.botName + '.' + channel + '.messageCount', channel, callback);
+		redis.hget(bot.botID + '.' + channel + '.messageCount', channel, callback);
 	}
 
 	function getNickMessageCount (channel, nick, callback) {
-		redis.hget(bot.botName + '.' + channel + '.messageCount', nick.toLowerCase(), callback);
+		redis.hget(bot.botID + '.' + channel + '.messageCount', nick.toLowerCase(), callback);
 	}
 
 	function getMessageCountLeaderboard (channel, callback) {
-		redis.hgetall(bot.botName + '.' + channel + '.messageCount', callback);
+		redis.hgetall(bot.botID + '.' + channel + '.messageCount', callback);
 	}
 
 	function resetStats (channel) {
-		redis.del(bot.botName + '.' + channel + '.messageCount');
+		redis.del(bot.botID + '.' + channel + '.messageCount');
 	}
 
 	return function init (_bot){

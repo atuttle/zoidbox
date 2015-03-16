@@ -75,7 +75,7 @@ module.exports = (function(){
 						}
 						//get the last time I left
 						var output = [];
-						redis.hget(bot.botName + '.' + channel + '.lastleave', from.toLowerCase(), function(err, lastSeenTime) {
+						redis.hget(bot.botID + '.' + channel + '.lastleave', from.toLowerCase(), function(err, lastSeenTime) {
 							if (lastSeenTime !== null) {
 								var lastSeenDateString = new Date(_.parseInt(lastSeenTime));
 
