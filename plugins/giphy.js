@@ -16,17 +16,13 @@ module.exports = (function(){
 
 			if (text.indexOf('giphy:') === 0 && text.length >= 5) {
 				var term = text.substr(6);
-				if(_.contains(['reacharound', 'reachie', 'reach-around'], term)) {
-					bot.say(to, 'http://ugcserver.com/betsie.gif');
-				} else {
-					randomGiphy(text.substr(6), function(err, url){
-						if (err){
-							bot.say(to, err);
-						}else{
-							bot.say(to, url);
-						}
-					});
-				}
+				randomGiphy(text.substr(6), function(err, url){
+					if (err){
+						bot.say(to, err);
+					}else{
+						bot.say(to, url);
+					}
+				});
 			}
 		});
 	};
