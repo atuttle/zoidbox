@@ -10,6 +10,7 @@
     "npm": "1.1.x"
   },
   "dependencies": {
+    "apigiphy": "^0.1.3",
     "async": "^0.9.0",
     "charmed": "^0.2.8",
     "irc": "^0.3.7",
