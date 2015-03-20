@@ -2,52 +2,64 @@
 
 module.exports = (function(){
 
-	var _ = require( 'lodash' );
+  var _ = require( 'lodash' );
+  var giphy = require('apigiphy');
+  giphy = giphy({ api_key: 'dc6zaTOxFJmzC' });
 
-	return function init( bot ){
-		bot.on( 'message', function( from, to, text ){
+  return function init( bot ){
+    bot.on( 'message', function( from, to, text ){
 
-			if (bot.isChannelPaused(to)) return;
+      if (bot.isChannelPaused(to)) return;
 
-			if (to === bot.botName) {
-				//they are talking to us in a private message, set to to be from
-				to = from;
-			}
+      if (to === bot.botName) {
+          //they are talking to us in a private message, set to to be from
+          to = from;
+      }
 
-			if (text.indexOf('giphy:') === 0 && text.length >= 5) {
-				var term = text.substr(6);
-				if(_.contains(['reacharound', 'reachie', 'reach-around'], term)) {
-					bot.say(to, 'http://ugcserver.com/betsie.gif');
-				} else {
-					randomGiphy(text.substr(6), function(err, url){
-						if (err){
-							bot.say(to, err);
-						}else{
-							bot.say(to, url);
-						}
-					});
-				}
-			}
+      if (text.indexOf('giphy:') === 0 && text.length >= 5) {
+
+        var command = text.trim().split(' ');
+        var rating = getRating(command);
+        var term = text.substr(6);
+
+		giphy.random({ tag: text.substr(6), rating: rating })
+		.then(function(response){
+			bot.say(to, response.data.image_original_url);
+		}, function(error){
+			bot.say(to, err);
 		});
-	};
 
-	function randomGiphy(term, callback){
-		var request = require('request');
-		var url = 'http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&rating=pg&tag=';
-		request( url + term, function(err, result){
-			if( err ){
-				callback('Sorry, looks like there was a problem with the api... http://i.imgur.com/amCuffe.gif');
-				return console.error( err );
-			}
-			try {
-				var response = JSON.parse( result.body );
-			}catch(e){
-				return callback('Sorry, the API returned a bunch of crap. http://i.imgur.com/fjmMVba.gif');
-			}
+      }
+    });
+  };
 
-			if (response.meta.status !== 200) return callback( 'oops, looks like shit\'s broke, yo.', null );
-			else return callback( null, response.data.image_url );
-		});
-	}
+  function getRating(command) {
+      var rating = 'pg-13'; // (y, g, pg, pg-13 or r)
+      if (command.length > 1) {
+          switch (command[1].trim()) {
+              case '-y' :
+                  rating = 'y';
+                  break;
+              case '-g' :
+                  rating = 'g';
+                  break;
+              case '-pg' :
+                  rating = 'pg';
+                  break;
+              case '-pg-13' :
+              case '-pg13' :
+                  rating = 'pg-13';
+                  break;
+              case '-r' :
+                  rating = 'r';
+                  break;
+              default :
+                  rating = 'pg-13';
+                  break;
+          }
+      }
+      return rating;
+  };
+
 
 })();
