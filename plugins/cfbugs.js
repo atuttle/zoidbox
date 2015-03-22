@@ -7,6 +7,7 @@ module.exports = (function(){
 	var charmed = require( 'charmed' );
 	var bot;
 	var frequency = 1000 * 60 * 15; //every 15 minutes
+	var onErrorDebounce = _.debounce(onError, 60 * 1000, {'leading': true, 'trailing': false});
 
 	//adapted from: https://github.com/daccfml/scratch/blob/master/adamcameroncoldfusion.cfmldeveloper.com/wwwroot/cfbugs/adobeBugRss.cfm
 	var product = 1149;
@@ -100,8 +101,9 @@ module.exports = (function(){
 	function notify( bugId, title, link, versionCode, quietly ){
 		quietly = quietly || false;
 		bot.redis.sismember( 'cfbugs.seen', bugId, function( err, data ){
-			if ( err ){
-				return bot.say( '#zoidbox', 'CFBugs plugin error' );
+			if (err) {
+				console.error(err);
+				return onErrorDebounce('checking cfbugs.seen', err);
 			}
 			if ( data === 0 ){ //haven't posted about this one yet, share it
 				if ( !quietly ){
@@ -114,6 +116,10 @@ module.exports = (function(){
 				console.log( 'skipping %s, shared it already', bugId );
 			}
 		});
+	}
+
+	function onError (msg, err) {
+		bot.say(bot.testingChannel, 'CFBugs Plugin Error ~ ' + msg + ' : ' + err);
 	}
 
 }());
