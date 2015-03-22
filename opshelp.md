@@ -92,6 +92,9 @@ Will block all input and output in the current room from the bot until an #unpau
 
 Will resume bot activities in the current room
 
+### #restart botname / #kill botname
+
+Will cause the bot process to exit and hopefully restart (when running on heroku)
 
 ### #cfhour !init
 
