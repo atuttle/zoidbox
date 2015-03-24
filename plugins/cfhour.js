@@ -4,8 +4,10 @@ module.exports = (function(){
 
 	var feedparser = require('ortoo-feedparser');
 	var bot;
+	var _ = require('lodash');
 	var frequency = 1000 * 60 * 15; //every 15 minutes
 	var feedUrl = 'http://feeds.feedburner.com/CfhourColdfusionPodcast';
+	var onErrorDebounce = _.debounce(onError, 60 * 1000, {'leading': true, 'trailing': false});
 
 	return function init( _bot ){
 		bot = _bot;
@@ -85,9 +87,9 @@ module.exports = (function(){
 				}
 				else {
 					console.error(error);
+					onErrorDebounce('checkForShows rss parsing', error);
 				}
 			}
-
 		);
 	}
 
@@ -95,9 +97,9 @@ module.exports = (function(){
 		quietly = quietly || false;
 		bot.redis.sismember( 'cfhour.seen', showRef, function( err, data ){
 			if ( err ){
-				return bot.say( '#zoidbox', 'CFHour plugin error' );
-			}
-			if ( data === 0 ){ //haven't posted about this one yet, share it
+				console.error(err);
+				return onErrorDebounce('cfhour.seen', err);
+			} else if ( data === 0 ){ //haven't posted about this one yet, share it
 				if ( !quietly ){
 					bot.say( '#zoidbox', 'Waffle alert! NEW CFHour Show: ' + title + ' ~ ' + link + ' ~ http://cfhour.com' );
 					bot.say( '##coldfusion', 'Waffle alert! NEW CFHour Show: ' + title + ' ~ ' + link + ' ~ http://cfhour.com' );
@@ -108,6 +110,10 @@ module.exports = (function(){
 				console.log( 'skipping %s, shared it already', showRef );
 			}
 		});
+	}
+
+	function onError (msg, err) {
+		bot.say(bot.testingChannel, 'CFHour Error: ' + msg + ' : ' + err);
 	}
 
 }());

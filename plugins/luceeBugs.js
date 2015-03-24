@@ -8,6 +8,7 @@ module.exports = (function(){
 	var bot;
 	var frequency = 1000 * 60 * 15; //15 minutes
 	var redis;
+	var onErrorDebounce = _.debounce(onError, 60 * 1000, {'leading': true, 'trailing': false});
 
 	return function init( _bot) {
 		bot = _bot;
@@ -99,7 +100,10 @@ module.exports = (function(){
 		quietly = quietly || false;
 
 		redis.sismember('lucee_issues.seen', issueID, function(err, data){
-			if (err) return bot.say(bot.testingChannel, 'lucee issues plugin error ~ checking lucee_issues.seen: ' + err);
+			if (err) {
+				console.error(err);
+				return onErrorDebounce('checking lucee_issues.seen', err);
+			}
 			if (data === 0) {
 				if (!quietly) {
 					var message = formatMessage(issueID, title, issueType, priority, status);
@@ -126,6 +130,10 @@ module.exports = (function(){
 			message += ' ~ https://bitbucket.org/lucee/lucee/issue/' + issueID.toString();
 		}
 		return message;
+	}
+
+	function onError (msg, err) {
+		bot.say(bot.testingChannel, 'lucee issues plugin error ~ ' + msg + ' : ' + err);
 	}
 
 })();
