@@ -42,9 +42,9 @@ module.exports = (function(){
 			if (response.status !== 200) return callback( 'oops, looks like shit\'s broke, yo.', null );
 			else {
 				var URL = require('url');
-				if (URL.parse(response.gif.gif).host == "i.minus.com"){
+				if (URL.parse(response.gif.gif).host == 'i.minus.com'){
 					if (abort){
-						return callback( "Tried twice, all I got was i.minus.com gifs... trust me, you don't want that... minus sucks." );
+						return callback( 'Tried twice, all I got was i.minus.com gifs... trust me, you don`t want that... minus sucks.' );
 					}
 					return gifme( term, callback, true );
 				}

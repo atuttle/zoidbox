@@ -87,7 +87,7 @@ module.exports = (function(){
 				}
 				else {
 					console.error(error);
-					onErrorDebounce(error);
+					onErrorDebounce('checkForShows rss parsing', error);
 				}
 			}
 		);
@@ -113,7 +113,7 @@ module.exports = (function(){
 	}
 
 	function onError (msg, err) {
-		bot.say(bot.testingChannel, "CFHour Error: " + msg + ' : ' + err);
+		bot.say(bot.testingChannel, 'CFHour Error: ' + msg + ' : ' + err);
 	}
 
 }());
