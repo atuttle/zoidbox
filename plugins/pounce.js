@@ -42,19 +42,19 @@ module.exports = (function(){
 				});
 
 			} else if (text.indexOf('#pounce') === 0) {
-
+				var channel = to;
 				var args = text.replace('#pounce','').trim().split(' ');
 				var target = args.shift();
-				if (target.lenth === 0){
-					return bot.say( chan, 'Whom should I pounce? #pounce nick message' );
+				if (target.length === 0){
+					return bot.say(channel, 'Whom should I pounce? #pounce nick message' );
 				}
 				var msg = args.join(' ');
-				var chan = to;
-				if (bot.isCurrentlyOnline(chan, target)){
-					bot.say( chan, 'Tell them yourself, jerk!' );
+
+				if (bot.isCurrentlyOnline(channel, target)){
+					bot.say(channel, 'Tell them yourself, jerk!' );
 				}else{
-					addPounce( chan, target, from, msg );
-					bot.say( chan, 'You got it, ' + from );
+					addPounce(channel, target, from, msg );
+					bot.say(channel, 'You got it, ' + from );
 				}
 
 			}
@@ -97,9 +97,9 @@ module.exports = (function(){
 				bot.redis.smembers( chan + '.pounce.' + nick, function( err, pounces ){
 					if (pounces.length){
 						for (var p in pounces){
-							console.log(pounces[p]);
+							//console.log(pounces[p]);
 							var data = JSON.parse( pounces[p] );
-							console.log(data);
+							//console.log(data);
 
 							bot.say( chan, nick + ': ' + data.from + ' wanted me to tell you, `' + data.msg + '` ~ sent: ' + moment(data.time).toISOString());
 						}
