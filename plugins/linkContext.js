@@ -24,6 +24,10 @@ module.exports = (function(){
 			if (!_.isNull(results) && results.length) {
 				return getInfoForGithubIssue(to, results[0]);
 			}
+			results = /https:\/\/[\w-]*\.atlassian.net\/browse\/\d*\/?[\w-]*/g.exec(text);
+			if (!_.isNull(results) && results.length) {
+				return getInfoForJiraIssue(to, results[0]);
+			}
 		});
 	};
 
@@ -53,6 +57,35 @@ module.exports = (function(){
 			} else {
 				console.error(err);
 				return bot.say(bot.testingChannel, 'There was a problem with the request for bitbucket issue: ' + err + '; apiURL: '+ url);
+			}
+		});
+	}
+
+	function getInfoForJiraIssue (channel, link) {
+		var parts = link.split('/');
+		var url = 'https://{domain}/rest/api/2/issue/{issueID}';
+		url = url.replace('{domain}', parts[2]);
+		url = url.replace('{issueID}', parts[4]);
+
+		request(url, function (err, response, body) {
+			if (err) {
+				console.error(err);
+				return bot.say(bot.testingChannel, 'There was a problem with the request for jira issue: ' + err + '; apiURL: '+ url);
+			} else if (response.statusCode === 200) {
+				try {
+					var issue = JSON.parse(body);
+					var message = _.capitalize(parts[4]) + ' Issue: ' + _.capitalize(issue.fields.status.name) + ' `' + _.capitalize(issue.fields.priority.name) + '` ' + _.capitalize(issue.fields.issuetype.name) + ': ' + issue.fields.summary;
+
+					return  bot.say(channel, message);
+				} catch (e) {
+					console.error('Error parsing JSON response from ' + url);
+					return bot.say(bot.testingChannel, 'There was a problem parsing the jira issues JSON response: ' + url);
+				}
+			} else if (response.statusCode === 404) {
+				return bot.say(bot.testingChannel, 'Could not find bitbucket issue: '+ url);
+			} else {
+				console.error(err);
+				return bot.say(bot.testingChannel, 'There was a problem with the request for jira issue: ' + err + '; apiURL: '+ url);
 			}
 		});
 	}
