@@ -100,7 +100,9 @@ module.exports = (function(){
 			} else if (nick.toLowerCase().split(' ')[0] === '!all' && to === bot.testingChannel) {
 				//log('!all', to, bot.botName);
 				getChannels(function(err, data){
-					bot.say(to, 'I have data for the following channels: ' + data.join(', '));
+					//only show data for non-private rooms
+					data = data.filter(function(room) { return room.indexOf('#') === 0; });
+					bot.say(to, 'I have data for the following (non-private) channels: ' + data.join(', '));
 					_.each(data, function(channel) {
 						displayStatsForChannel(channel, to);
 					});
