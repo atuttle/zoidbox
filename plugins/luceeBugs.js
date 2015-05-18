@@ -3,7 +3,7 @@
 module.exports = (function(){
 	var _ = require('lodash');
 	var request = require('request');
-	var openIssuesApiURL = 'https://luceeserver.atlassian.net/rest/api/2/search?jql=project%20%3D%20LDEV%20ORDER%20BY%20createdDate';
+	var openIssuesApiURL = 'https://luceeserver.atlassian.net/rest/api/2/search?jql=project%20in%20(LDEV%2C%20LD)%20ORDER%20BY%20createdDate';
 	var issueApiURL = 'https://luceeserver.atlassian.net/rest/api/2/issue/{issueID}';
 	var bot;
 	var frequency = 1000 * 60 * 15; //15 minutes
