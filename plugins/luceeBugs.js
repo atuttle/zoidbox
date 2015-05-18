@@ -3,8 +3,8 @@
 module.exports = (function(){
 	var _ = require('lodash');
 	var request = require('request');
-	var openIssuesApiURL = 'https://bitbucket.org/api/1.0/repositories/lucee/lucee/issues?status=open&status=new';
-	var issueApiURL = 'https://bitbucket.org/api/1.0/repositories/lucee/lucee/issues/{issueID}';
+	var openIssuesApiURL = 'https://luceeserver.atlassian.net/rest/api/2/search?jql=project%20%3D%20LDEV%20ORDER%20BY%20createdDate';
+	var issueApiURL = 'https://luceeserver.atlassian.net/rest/api/2/issue/{issueID}';
 	var bot;
 	var frequency = 1000 * 60 * 15; //15 minutes
 	var redis;
@@ -63,7 +63,7 @@ module.exports = (function(){
 					var data = JSON.parse(body);
 
 					_.each(data.issues, function(issue) {
-						notify(issue.local_id, issue.title, issue.metadata.kind, issue.priority, issue.status, quietly);
+						notify(issue.key, issue.fields.summary, issue.fields.issuetype.name, issue.fields.priority.name, issue.fields.status.name, quietly);
 					});
 
 				} catch (e) {
@@ -85,7 +85,7 @@ module.exports = (function(){
 			} else if (response.statusCode === 200) {
 				try {
 					var issue = JSON.parse(body);
-					return  bot.say(channel, formatMessage(issue.local_id, issue.title, issue.metadata.kind, issue.priority, issue.status));
+					return  bot.say(channel, formatMessage(issue.key, issue.fields.summary, issue.fields.issuetype.name, issue.fields.priority.name, issue.fields.status.name));
 				} catch (e) {
 					console.error('Error parsing JSON response from ' + url);
 					return bot.say(channel, 'There was a problem parsing the lucee issues JSON response: ' + url);
@@ -127,7 +127,7 @@ module.exports = (function(){
 		}
 		var message = 'LUCEE ISSUE: ' + _.capitalize(status) + ' `' + _.capitalize(priority) + '` ' + _.capitalize(issueType) + ': ' + title;
 		if (includeLink) {
-			message += ' ~ https://bitbucket.org/lucee/lucee/issue/' + issueID.toString();
+			message += ' ~ https://luceeserver.atlassian.net/browse/' + issueID.toString();
 		}
 		return message;
 	}
